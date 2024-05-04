@@ -1,14 +1,15 @@
 import typer
-from typing_extensions import Annotated
-from dyck_k_generator import constants as c
 from tqdm import tqdm
+from typing_extensions import Annotated
+
+from dyck_k_generator import constants as c
 
 
 def is_dyck_word(
-        query: Annotated[str, typer.Argument()], 
-        k: Annotated[int, typer.Argument()], 
-        verbose: Annotated[bool, typer.Option()] = False
-    ) -> bool|None:
+    query: Annotated[str, typer.Argument()],
+    k: Annotated[int, typer.Argument()],
+    verbose: Annotated[bool, typer.Option()] = False,
+) -> bool:
     """
     Check if a word is a member of the Dyck language of order k.
 
@@ -22,7 +23,7 @@ def is_dyck_word(
 
     if len(query) % 2 != 0:
         return False
-    
+
     bracket_types = {k: v for k, v in list(c.BRACKETS.items())[:k]}
     closing_brackets = {v: k for k, v in bracket_types.items()}
 
@@ -34,13 +35,13 @@ def is_dyck_word(
         elif bracket in closing_brackets:
             if not stack or closing_brackets[bracket] != stack.pop():
                 return False
-            
+
     if verbose:
         print(not stack)
+        return not stack
     else:
         return not stack
 
-if __name__ == "__main__":
-    is_dyck_word()
 
-    
+if __name__ == "__main__":
+    typer.run(is_dyck_word)
