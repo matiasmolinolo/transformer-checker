@@ -1,4 +1,5 @@
 import json
+import os
 import random
 from typing import List, Tuple
 
@@ -154,6 +155,9 @@ def generate_dataset(
 
     if file:
         path = f"data/dyck-{k}_{n}-samples_{max_length}-len_p{str(balanced).replace('.', '')}.jsonl"
+        if not os.path.exists(path.split("/")[0]):
+            print(f"Creating directory: {path.split('/')[0]}")
+            os.makedirs(path.split("/")[0])
         f = open(path, "w")
         for sample in tqdm(dataset, desc=f"Saving dataset to {path}"):
             json_record = json.dumps(sample)
