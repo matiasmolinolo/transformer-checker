@@ -17,7 +17,7 @@ class DyckLanguageTokenizer:
         }
         self.i_to_tok = {i: tok for tok, i in self.tok_to_i.items()}
 
-    def tokenize(self, strings: List[str], max_len=None):
+    def tokenize(self, strings: str | List[str], max_len=None):
         def c_to_i(c):
             if c in self.tok_to_i:
                 return float(self.tok_to_i[c])
@@ -62,14 +62,17 @@ class DyckLanguageTokenizer:
 
 
 class DyckLanguageDataset(Dataset):
-    def __init__(self, file, vocab):
+    def __init__(self, file: str | list, vocab: str):
         self.vocab = vocab
         self.tokenizer = DyckLanguageTokenizer(vocab)
         self.data = []
-        with open(file, "r") as f:
-            for line in f:
-                self.data.append(json.loads(line))
-            print(f"Loaded {len(self.data)} samples from {file}")
+        if isinstance(file, list):
+            self.data = file
+        elif isinstance(file, str):
+            with open(file, "r") as f:
+                for line in f:
+                    self.data.append(json.loads(line))
+                print(f"Loaded {len(self.data)} samples from {file}")
 
         self.strings = [sample[0] for sample in self.data]
         self.tokenized = self.tokenizer.tokenize(self.strings)
@@ -87,6 +90,8 @@ class DyckLanguageDataset(Dataset):
 
     def __getitem__(self, idx):
         if type(idx) == slice:
-            return self.__class__(list(zip(self.strings[idx], self.balanced[idx])))
+            return self.__class__(
+                list(zip(self.strings[idx], self.balanced[idx])), self.vocab
+            )
 
         return (self.strings[idx], self.balanced[idx], self.tokenized[idx])

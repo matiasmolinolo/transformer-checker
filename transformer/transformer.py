@@ -5,6 +5,7 @@ import torch.nn as nn
 from transformer_lens.HookedTransformer import HookedTransformer
 from transformer_lens.HookedTransformerConfig import HookedTransformerConfig
 from transformer_lens.train import HookedTransformerTrainConfig, train
+from transformers import PretrainedConfig, PreTrainedModel
 
 
 def generate_config(
@@ -126,14 +127,42 @@ class TransformerEncoderLayer(nn.Module):
         return x
 
 
-class TransformerClassifier(nn.Module):
-    def __init__(self, in_dim, d_model, n_heads, ff_dim, n_layers, n_classes):
-        super().__init__()
-        self.embedding = nn.Linear(in_dim, d_model)
+class TransformerClassifierConfig(PretrainedConfig):
+    model_type = "transformer-checker"
+
+    def __init__(
+        self,
+        in_dim=512,
+        d_model=256,
+        n_heads=8,
+        ff_dim=2048,
+        n_layers=6,
+        n_classes=2,
+        **kwargs,
+    ):
+        self.in_dim = in_dim
+        self.d_model = d_model
+        self.n_heads = n_heads
+        self.ff_dim = ff_dim
+        self.n_layers = n_layers
+        self.n_classes = n_classes
+
+        super().__init__(**kwargs)
+
+
+class TransformerClassifier(PreTrainedModel):
+    config_class = TransformerClassifierConfig
+
+    def __init__(self, config: TransformerClassifierConfig):
+        super().__init__(config)
+        self.embedding = nn.Linear(config.in_dim, config.d_model)
         self.encoders = nn.ModuleList(
-            [TransformerEncoderLayer(d_model, n_heads, ff_dim) for _ in range(n_layers)]
+            [
+                TransformerEncoderLayer(config.d_model, config.n_heads, config.ff_dim)
+                for _ in range(config.n_layers)
+            ]
         )
-        self.classifier = nn.Linear(d_model, n_classes)
+        self.classifier = nn.Linear(config.d_model, config.n_classes)
 
     def forward(self, x, mask=None):
         x = self.embedding(x)
