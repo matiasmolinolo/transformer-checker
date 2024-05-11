@@ -37,7 +37,7 @@ class DyckLanguageTokenizer:
             for s in strings
         ]
 
-        return torch.tensor(tokenized, dtype=torch.LongTensor)
+        return torch.tensor(tokenized, dtype=torch.float)
 
     def decode(self, tokens):
         if tokens.ndim < 2:
