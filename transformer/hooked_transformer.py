@@ -11,7 +11,6 @@ class ScaledDotProductAttention(nn.Module):
         self.scale = scale
 
     def forward(self, q, k, v, mask=None):
-        print(q.shape, k.shape, v.shape)
         attn = torch.matmul(q, k.transpose(-2, -1)) / self.scale
         if mask is not None:
             attn = attn.masked_fill(mask == 0, float("-inf"))
@@ -150,7 +149,6 @@ class TransformerClassifier(nn.Module):
     def forward(self, x, mask=None):
         x = x.long()
         x = self.embedding(x)
-        print("Shape after embedding:", x.shape)
 
         for encoder in self.encoder_layers:
             x, _ = encoder(x, mask=mask)
