@@ -86,13 +86,9 @@ class MultiHeadAttention(nn.Module):
 class TransformerEncoderLayer(nn.Module):
     def __init__(self, d_model, n_heads, dim_ff, dropout=0.1):
         super().__init__()
-        self.attn = MultiHeadAttention(
-            n_heads=n_heads, d_model=d_model, dropout=dropout
-        )
+        self.attn = MultiHeadAttention(n_heads=n_heads, d_model=d_model, dropout=dropout)
 
-        self.ff = nn.Sequential(
-            nn.Linear(d_model, dim_ff), nn.ReLU(), nn.Linear(dim_ff, d_model), nn.ReLU()
-        )
+        self.ff = nn.Sequential(nn.Linear(d_model, dim_ff), nn.ReLU(), nn.Linear(dim_ff, d_model), nn.ReLU())
 
         self.ln1 = nn.LayerNorm(d_model)
         self.ln2 = nn.LayerNorm(d_model)

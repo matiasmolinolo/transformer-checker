@@ -24,3 +24,14 @@ ruff = "^0.4.3"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 120
+indent-width = 4
+exclude = [
+    ".git",
+    ".venv",
+    "_build",
+    "build",
+    "data"
+]

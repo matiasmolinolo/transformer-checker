@@ -63,9 +63,7 @@ def _generate_unbalanced_string(order: int, length: int) -> str:
     return unbalanced_str
 
 
-def _generate_samples(
-    n: int, k: int, max_length: int = 1024, balanced: float = 0.5
-) -> List[str]:
+def _generate_samples(n: int, k: int, max_length: int = 1024, balanced: float = 0.5) -> List[str]:
     """
     Generate a list of 'n' strings of length at most 'max_length' from the Dyck language of order 'k'.
     These strings may or may not be members of the Dyck language of order 'k'.
@@ -89,9 +87,7 @@ def _generate_samples(
     ]
     unbalanced_strings = [
         _generate_unbalanced_string(k, random.randint(2, max_length))
-        for _ in tqdm(
-            range(n - len(balanced_strings)), desc="Generating unbalanced strings"
-        )
+        for _ in tqdm(range(n - len(balanced_strings)), desc="Generating unbalanced strings")
     ]
 
     assert (
@@ -114,16 +110,10 @@ def _generate_samples(
 
 
 def generate_dataset(
-    n: Annotated[
-        int, typer.Option(help="The number of strings to generate.")
-    ] = 500_000,
+    n: Annotated[int, typer.Option(help="The number of strings to generate.")] = 500_000,
     k: Annotated[int, typer.Option(help="The order of the Dyck language.")] = 3,
-    max_length: Annotated[
-        int, typer.Option(help="The maximum length of the strings to generate.")
-    ] = 1024,
-    balanced: Annotated[
-        float, typer.Option(help="The proportion of balanced strings to generate.")
-    ] = 0.5,
+    max_length: Annotated[int, typer.Option(help="The maximum length of the strings to generate.")] = 1024,
+    balanced: Annotated[float, typer.Option(help="The proportion of balanced strings to generate.")] = 0.5,
     file: Annotated[
         bool,
         typer.Option(
