@@ -29,6 +29,9 @@ class PositionalEncoder(nn.Module):
         x = x + self.pos_enc[:, : x.size(1), :]
         x = self.dropout(x)
 
+        return x
+    
+
 class ScaledDotProductAttention(nn.Module):
     def __init__(self, scale):
         super().__init__()
@@ -67,7 +70,18 @@ class MultiHeadAttention(nn.Module):
 
         self.out = nn.Linear(d_model, d_model, bias=bias)
 
-    def forward(self, q, k, v, mask=None):
+    def _reset_params(self):
+        nn.init.xavier_uniform_(self.q_linear.weight)
+        nn.init.xavier_uniform_(self.k_linear.weight)
+        nn.init.xavier_uniform_(self.v_linear.weight)
+        nn.init.xavier_uniform_(self.out.weight)
+
+        self.q_linear.bias.data.fill_(0)
+        self.k_linear.bias.data.fill_(0)
+        self.v_linear.bias.data.fill_(0)
+        self.out.bias.data.fill_(0)
+
+    def forward(self, q, k, v, mask=None, return_attn=False):
         batch_size = q.size(0)
     
         q = self.q_linear(q).view(batch_size, -1, self.n_heads, self.depth).transpose(1, 2)
@@ -80,15 +94,22 @@ class MultiHeadAttention(nn.Module):
 
         attn = self.residual_dropout(self.out(attn))
 
-        return attn, attn_weights
+        if return_attn:
+            return attn, attn_weights
+        return attn
 
 
-class TransformerEncoderLayer(nn.Module):
+class EncoderBlock(nn.Module):
     def __init__(self, d_model, n_heads, dim_ff, dropout=0.1):
         super().__init__()
         self.attn = MultiHeadAttention(n_heads=n_heads, d_model=d_model, dropout=dropout)
 
-        self.ff = nn.Sequential(nn.Linear(d_model, dim_ff), nn.ReLU(), nn.Linear(dim_ff, d_model))
+        self.ff = nn.Sequential(
+            nn.Linear(d_model, dim_ff), 
+            nn.Dropout(dropout), 
+            nn.ReLU(inplace=True), 
+            nn.Linear(dim_ff, d_model)
+        )
 
         self.ln1 = nn.LayerNorm(d_model)
         self.ln2 = nn.LayerNorm(d_model)
@@ -96,14 +117,39 @@ class TransformerEncoderLayer(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, mask=None):
-        attn_out, attn_weights = self.attn(x, x, x, mask=mask)
+        attn_out = self.attn(x, x, x, mask=mask)
         x = self.ln1(x + self.dropout(attn_out))
 
         ff_out = self.ff(x)
         x = self.ln2(x + self.dropout(ff_out))
 
-        return x, attn_weights
+        return x
 
+
+class TransformerEncoder(nn.Module):
+    def __init__(self, n_layers, d_model, n_heads, dim_ff, dropout=0.1):
+        super().__init__()
+        self.layers = nn.ModuleList(
+            [
+                EncoderBlock(d_model=d_model, n_heads=n_heads, dim_ff=dim_ff, dropout=dropout)
+                for _ in range(n_layers)
+            ]
+        )
+
+    def forward(self, x, mask=None):
+        for layer in self.layers:
+            x = layer(x, mask=mask)
+
+        return x
+
+    def get_attn_matrices(self, x, mask=None):
+        attn_matrices = []
+        for layer in self.layers:
+            _, attn_weights = layer.attn(q=x, k=x, v=x, mask=mask, return_attn=True)
+            attn_matrices.append(attn_weights)
+        
+        return attn_matrices
+    
 
 class TransformerClassifierConfig:
     def __init__(self, vocab_size, d_model, n_heads, dim_ff, n_layers, n_classes, max_seq_len):
@@ -113,7 +159,7 @@ class TransformerClassifierConfig:
         self.dim_ff = dim_ff
         self.n_layers = n_layers
         self.n_classes = n_classes
-        self.max_seq_len = max_seq_len
+        self.max_seq_len = max_seq_len + 2
 
 
 class TransformerClassifier(nn.Module):
@@ -130,15 +176,11 @@ class TransformerClassifier(nn.Module):
         self.embedding = nn.Embedding(self.vocab_size, self.d_model)
         self.pos_encoder = PositionalEncoder(self.d_model, config.max_seq_len)
 
-        self.encoder_layers = nn.ModuleList(
-            [
-                TransformerEncoderLayer(
-                    d_model=self.d_model,
-                    n_heads=self.n_heads,
-                    dim_ff=self.dim_ff,
-                )
-                for _ in range(self.n_layers)
-            ]
+        self.transformer = TransformerEncoder(
+            n_layers=self.n_layers,
+            d_model=self.d_model,
+            n_heads=self.n_heads,
+            dim_ff=self.dim_ff,
         )
 
         self.fc = nn.Linear(self.d_model, self.n_classes)
@@ -147,14 +189,22 @@ class TransformerClassifier(nn.Module):
     def forward(self, x, mask=None):
         x = x.long()
         x = self.embedding(x)
-
-        for encoder in self.encoder_layers:
-            x, _ = encoder(x, mask=mask)
+        
+        x = self.transformer(x, mask=mask)
 
         x = x[:, 0]
         x = self.fc(x)
 
         return x
+    
+    @torch.no_grad()
+    def get_attn_matrices(self, x, mask=None):
+        x = x.long()
+        x = self.embedding(x)
+        
+        attn_matrices = self.transformer.get_attn_matrices(x, mask=mask)
+        
+        return attn_matrices
 
 
 def pad_token_mask(input_ids, pad_token=1):
