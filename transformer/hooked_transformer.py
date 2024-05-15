@@ -5,14 +5,40 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+class PositionalEncoder(nn.Module):
+    def __init__(self, d_model, max_len=1024, dropout=0.1):
+        super().__init__()
+        self.d_model = d_model
+        self.dropout = nn.Dropout(dropout)
+
+        pos_enc = torch.zeros(max_len, d_model)
+        pos = torch.arange(0, max_len).unsqueeze(1).float()
+
+        div_term = 1.0 / torch.pow(10_000, torch.arange(0, d_model, 2).float() / d_model)
+
+        pos_enc[:, 0::2] = torch.sin(pos * div_term)
+        pos_enc[:, 1::2] = torch.cos(pos * div_term)
+
+        pos_enc = pos_enc.unsqueeze(0)
+
+        self.register_buffer("pos_enc", pos_enc)
+
+    def forward(self, x):
+        x = x * math.sqrt(self.d_model)
+
+        x = x + self.pos_enc[:, : x.size(1), :]
+        x = self.dropout(x)
+
 class ScaledDotProductAttention(nn.Module):
     def __init__(self, scale):
         super().__init__()
         self.scale = scale
 
     def forward(self, q, k, v, mask=None):
-        attn = torch.matmul(q, k.transpose(-2, -1)) / self.scale
+        attn = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(self.scale)
+
         if mask is not None:
+            mask = mask.unsqueeze(1)
             attn = attn.masked_fill(mask == 0, float("-inf"))
 
         attn = F.softmax(attn, dim=-1)
@@ -30,57 +56,31 @@ class MultiHeadAttention(nn.Module):
         self.n_heads = n_heads
         self.depth = d_model // n_heads
 
-        self.wq = nn.Linear(d_model, d_model, bias=bias)
-        self.wk = nn.Linear(d_model, d_model, bias=bias)
-        self.wv = nn.Linear(d_model, d_model, bias=bias)
+        self.q_linear = nn.Linear(d_model, d_model, bias=bias)
+        self.k_linear = nn.Linear(d_model, d_model, bias=bias)
+        self.v_linear = nn.Linear(d_model, d_model, bias=bias)
 
-        self.wo = nn.Linear(d_model, d_model)
+        self.attn_dropout = nn.Dropout(dropout)
+        self.residual_dropout = nn.Dropout(dropout)
 
-        self.attn = ScaledDotProductAttention(scale=math.sqrt(self.depth))
+        self.attn = ScaledDotProductAttention(self.depth)
 
-        self.dropout = nn.Dropout(dropout)
-        self.ln = nn.LayerNorm(d_model)
-
-    def _split_heads(self, x):
-        batch_size, seq_len, _ = x.size()
-        return (
-            x.reshape(batch_size, seq_len, self.n_heads, self.depth)
-            .permute(0, 2, 1, 3)
-            .reshape(batch_size * self.n_heads, seq_len, self.depth)
-        )
-
-    def _concat_heads(self, x):
-        # When concatenating back, since n_heads = 1, it should revert to the original d_model
-        batch_size, seq_len, in_features = x.size()
-        batch_size //= self.n_heads
-        return (
-            x.reshape(batch_size, seq_len, self.n_heads, in_features)
-            .permute(0, 2, 1, 3)
-            .reshape(batch_size, seq_len, self.d_model)
-        )
+        self.out = nn.Linear(d_model, d_model, bias=bias)
 
     def forward(self, q, k, v, mask=None):
-        q = self.wq(q)
-        k = self.wk(k)
-        v = self.wv(v)
+        batch_size = q.size(0)
+    
+        q = self.q_linear(q).view(batch_size, -1, self.n_heads, self.depth).transpose(1, 2)
+        k = self.k_linear(k).view(batch_size, -1, self.n_heads, self.depth).transpose(1, 2)
+        v = self.v_linear(v).view(batch_size, -1, self.n_heads, self.depth).transpose(1, 2)
 
-        q = self._split_heads(q)
-        k = self._split_heads(k)
-        v = self._split_heads(v)
+        attn, attn_weights = self.attn(q, k, v, mask=mask)
 
-        if mask is not None:
-            mask = mask.repeat(self.n_heads, 1, 1)
+        attn = self.attn_dropout(attn.transpose(1, 2).contiguous().view(batch_size, -1, self.d_model))
 
-        scaled_attn, attn_weights = self.attn(q=q, k=k, v=v, mask=mask)
+        attn = self.residual_dropout(self.out(attn))
 
-        attn = self._concat_heads(scaled_attn)
-
-        out = self.wo(attn)
-        out = self.dropout(out)
-
-        out = self.ln(out + q)  # add + norm, residual connection
-
-        return out, attn_weights
+        return attn, attn_weights
 
 
 class TransformerEncoderLayer(nn.Module):
@@ -88,7 +88,7 @@ class TransformerEncoderLayer(nn.Module):
         super().__init__()
         self.attn = MultiHeadAttention(n_heads=n_heads, d_model=d_model, dropout=dropout)
 
-        self.ff = nn.Sequential(nn.Linear(d_model, dim_ff), nn.ReLU(), nn.Linear(dim_ff, d_model), nn.ReLU())
+        self.ff = nn.Sequential(nn.Linear(d_model, dim_ff), nn.ReLU(), nn.Linear(dim_ff, d_model))
 
         self.ln1 = nn.LayerNorm(d_model)
         self.ln2 = nn.LayerNorm(d_model)
@@ -106,13 +106,14 @@ class TransformerEncoderLayer(nn.Module):
 
 
 class TransformerClassifierConfig:
-    def __init__(self, vocab_size, d_model, n_heads, dim_ff, n_layers, n_classes):
+    def __init__(self, vocab_size, d_model, n_heads, dim_ff, n_layers, n_classes, max_seq_len):
         self.vocab_size = vocab_size + 3
         self.d_model = d_model
         self.n_heads = n_heads
         self.dim_ff = dim_ff
         self.n_layers = n_layers
         self.n_classes = n_classes
+        self.max_seq_len = max_seq_len
 
 
 class TransformerClassifier(nn.Module):
@@ -127,6 +128,7 @@ class TransformerClassifier(nn.Module):
         self.dim_ff = config.dim_ff
 
         self.embedding = nn.Embedding(self.vocab_size, self.d_model)
+        self.pos_encoder = PositionalEncoder(self.d_model, config.max_seq_len)
 
         self.encoder_layers = nn.ModuleList(
             [
@@ -156,6 +158,4 @@ class TransformerClassifier(nn.Module):
 
 
 def pad_token_mask(input_ids, pad_token=1):
-    pad_mask = input_ids == pad_token
-
-    return pad_mask.logical_not().float()
+    return (input_ids != pad_token).unsqueeze(1).type(torch.uint8)

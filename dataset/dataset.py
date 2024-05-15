@@ -3,6 +3,7 @@ from typing import List
 
 import torch
 from torch.utils.data import Dataset
+from tqdm import tqdm
 
 
 class DyckLanguageTokenizer:
@@ -31,7 +32,7 @@ class DyckLanguageTokenizer:
 
         tokenized = [
             [self.START_TOKEN] + [c_to_i(c) for c in s] + [self.END_TOKEN] + [self.PAD_TOKEN] * (max_len - len(s))
-            for s in strings
+            for s in tqdm(strings, desc="Tokenizing strings")
         ]
 
         return torch.tensor(tokenized, dtype=torch.float)
