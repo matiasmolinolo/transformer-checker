@@ -11,44 +11,58 @@ from dyck_k_generator import checker
 from dyck_k_generator import constants as c
 
 
-def _generate_balanced_string(order: int, length: int) -> str:
+def _generate_balanced_string(order: int, length: int, seed: int = 42) -> str:
     """
     Generate a string of length `length` from the Dyck language of order `order`.
 
     Args:
         order (int): The order of the Dyck language.
         length (int): The length of the string to generate.
-
+        seed (int): The seed for the random number generator.
     Returns:
         str: A string of length `length` from the Dyck language of order `order`.
     """
+
     length = length if length % 2 == 0 else length + 1
+
+    stack = []
+    word = ""
 
     brackets = [(k, v) for k, v in list(c.BRACKETS.items())[:order]]
 
     half_length = length // 2
 
-    first_half = last_half = ""
+    first_half = last_half = 0
 
-    for _ in range(half_length):
-        selected_brackets = random.choice(brackets)
-        first_half += selected_brackets[0]
-        last_half += selected_brackets[1]
+    while first_half + last_half < length:
+        if first_half < half_length and (len(stack) == 0 or random.random() < 0.5):
+            opening_bracket, closing_bracket = random.choice(brackets)
+            stack.append(closing_bracket)
+            first_half += 1
+            word += opening_bracket
+        else:
+            bracket = stack.pop()
+            last_half += 1
+            word += bracket
 
-    return first_half + last_half[::-1]
+    return word
 
+    # grammar
+    # s -> eps
+    # s -> (s)s
 
-def _generate_unbalanced_string(order: int, length: int) -> str:
+def _generate_unbalanced_string(order: int, length: int, seed: int = 42) -> str:
     """
     Generate a string of length `length` that is not necessarily from the Dyck language of order `order`.
 
     Args:
         order (int): The order of the Dyck language.
         length (int): The length of the string to generate.
-
+        seed (int): The seed for the random number generator.
     Returns:
         str: A string of length `length` that is not necessarily from the Dyck language of order `order`.
     """
+    random.seed(seed)
 
     brackets = [(k, v) for k, v in list(c.BRACKETS.items())[:order]]
     brackets = [bracket for pair in brackets for bracket in pair]
@@ -63,7 +77,7 @@ def _generate_unbalanced_string(order: int, length: int) -> str:
     return unbalanced_str
 
 
-def _generate_samples(n: int, k: int, max_length: int = 1024, balanced: float = 0.5) -> List[str]:
+def _generate_samples(n: int, k: int, max_length: int = 1024, balanced: float = 0.5, seed: int = 42) -> List[str]:
     """
     Generate a list of 'n' strings of length at most 'max_length' from the Dyck language of order 'k'.
     These strings may or may not be members of the Dyck language of order 'k'.
@@ -77,9 +91,11 @@ def _generate_samples(n: int, k: int, max_length: int = 1024, balanced: float = 
         k (int): The order of the Dyck language.
         max_length (int): The maximum length of the strings to generate.
         balanced (float): The proportion of balanced strings to generate.
-
+        seed (int): The seed for the random number generator.
     Returns:
         List[str]: A list of 'n' strings of length at most 'max_length' from the Dyck language of order 'k'."""
+    
+    random.seed(seed)
 
     balanced_strings = [
         _generate_balanced_string(k, random.randint(2, max_length))
