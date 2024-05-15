@@ -24,17 +24,21 @@ def is_dyck_word(
     if len(query) % 2 != 0:
         return False
 
-    bracket_types = {k: v for k, v in list(c.BRACKETS.items())[:k]}
-    closing_brackets = {v: k for k, v in bracket_types.items()}
+    bracket_types = list(c.BRACKETS.items())[:k]
+
+    opening_brackets = {opening for opening, _ in bracket_types}
+    closing_brackets = {closing: opening for opening, closing in bracket_types}
 
     stack = []
 
     for bracket in tqdm(query, desc="Checking Dyck word", disable=not verbose):
-        if bracket in bracket_types:
+        if bracket in opening_brackets:
             stack.append(bracket)
         elif bracket in closing_brackets:
             if not stack or closing_brackets[bracket] != stack.pop():
                 return False
+        else:
+            return False
 
     if verbose:
         print(not stack)

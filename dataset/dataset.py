@@ -3,6 +3,7 @@ from typing import List
 
 import torch
 from torch.utils.data import Dataset
+from tqdm import tqdm
 
 
 class DyckLanguageTokenizer:
@@ -30,11 +31,8 @@ class DyckLanguageTokenizer:
             max_len = max((max(len(s) for s in strings)), 1)
 
         tokenized = [
-            [self.START_TOKEN]
-            + [c_to_i(c) for c in s]
-            + [self.END_TOKEN]
-            + [self.PAD_TOKEN] * (max_len - len(s))
-            for s in strings
+            [self.START_TOKEN] + [c_to_i(c) for c in s] + [self.END_TOKEN] + [self.PAD_TOKEN] * (max_len - len(s))
+            for s in tqdm(strings, desc="Tokenizing strings")
         ]
 
         return torch.tensor(tokenized, dtype=torch.float)
@@ -49,12 +47,7 @@ class DyckLanguageTokenizer:
             raise ValueError(f"Index {i} not in vocabulary")
 
         return [
-            "".join(
-                i_to_c(i.item())
-                for i in seq[1:]
-                if i != self.PAD_TOKEN and i != self.END_TOKEN
-            )
-            for seq in tokens
+            "".join(i_to_c(i.item()) for i in seq[1:] if i != self.PAD_TOKEN and i != self.END_TOKEN) for seq in tokens
         ]
 
     def __repr__(self):
@@ -76,9 +69,7 @@ class DyckLanguageDataset(Dataset):
 
         self.strings = [sample[0] for sample in self.data]
         self.tokenized = self.tokenizer.tokenize(self.strings)
-        self.balanced = torch.tensor(
-            [sample[1] for sample in self.data], dtype=torch.float
-        )
+        self.balanced = torch.tensor([sample[1] for sample in self.data], dtype=torch.float)
 
     def to(self, device):
         self.tokenized = self.tokenized.to(device)
@@ -90,8 +81,6 @@ class DyckLanguageDataset(Dataset):
 
     def __getitem__(self, idx):
         if type(idx) == slice:
-            return self.__class__(
-                list(zip(self.strings[idx], self.balanced[idx])), self.vocab
-            )
+            return self.__class__(list(zip(self.strings[idx], self.balanced[idx])), self.vocab)
 
         return (self.strings[idx], self.balanced[idx], self.tokenized[idx])

@@ -7,7 +7,7 @@ readme = "README.md"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.10"
 typer = "^0.12.3"
 tqdm = "^4.66.3"
 transformer-lens = "^1.17.0"
@@ -24,3 +24,14 @@ ruff = "^0.4.3"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 120
+indent-width = 4
+exclude = [
+    ".git",
+    ".venv",
+    "_build",
+    "build",
+    "data"
+]
