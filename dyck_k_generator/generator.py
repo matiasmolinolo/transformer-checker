@@ -136,7 +136,7 @@ def generate_dataset(
             help="If present, the dataset will be saved to a file, otherwise it will be returned to a variable."
         ),
     ] = True,
-) -> List[Tuple[str, bool]] | None:
+) -> List[Tuple[str, bool]] | str:
     """
     Generate a list of 'n' strings of length at most 'max_length' from the Dyck language of order 'k'.
     These strings may or may not be members of the Dyck language of order 'k'.
@@ -153,7 +153,7 @@ def generate_dataset(
         path (str): The path to save the generated strings - if None, the list will be returned to a variable.
 
     Returns:
-        List[Tuple[str, bool]]|None: A list of dictionaries that contain (str, bool), where string is the Dyck-k member string and class is its membership to the language.
+        List[Tuple[str, bool]]|str: A list of dictionaries that contain (str, bool), where string is the Dyck-k member string and class is its membership to the language or the path to the file.
     """
 
     strings: List[str] = _generate_samples(n, k, max_length, balanced)
@@ -170,6 +170,7 @@ def generate_dataset(
             f.write(json_record + "\n")
         print(f"Dataset saved to {path}")
         f.close()
+        return path
     else:
         return dataset
 

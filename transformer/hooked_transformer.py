@@ -243,9 +243,6 @@ class TransformerClassifier(nn.Module):
 
             train_acc = (total_correct / total_samples) * 100
 
-            if i % 100 == 99:
-                print(f"Batch {i + 1}/{len(train_loader)} | Loss: {epoch_loss / (i + 1):.4f} | Acc: {train_acc:.2f}%")
-
         return epoch_loss, train_acc
 
     def _val_epoch(self, val_loader, criterion, device, use_mask=False):
@@ -278,9 +275,6 @@ class TransformerClassifier(nn.Module):
                 total_samples += labels.size(0)
 
                 val_acc = (total_correct / total_samples) * 100
-
-                if i % 100 == 99:
-                    print(f"Batch {i + 1}/{len(val_loader)} | Loss: {val_loss / (i + 1):.4f} | Acc: {val_acc:.2f}%")
 
         return val_loss, val_acc
     
