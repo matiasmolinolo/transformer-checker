@@ -1,7 +1,7 @@
 
 %https://en.wikibooks.org/wiki/LaTeX/Internationalization
 \usepackage[utf8]{inputenc}
-\usepackage[english,spanish]{babel}
+\usepackage[english]{babel}
 \def\spanishdeactivate{<>."}
 
 %https://www.sharelatex.com/learn/Aligning_equations_with_amsmath
@@ -10,8 +10,8 @@
 \usepackage{amssymb}
 
 \usepackage{listingsutf8}%codigo con caracteres especiales
-\usepackage{setspace}
 
+\usepackage{setspace}
 
 %%ORT
 %metadata para la ORT
@@ -79,22 +79,18 @@
 \renewcommand{\footrulewidth}{0pt}
 \pagestyle{fancy}
 
-%%Nombre del índice tabla de contenido
-\renewcommand\contentsname{Índice}
 
 %%para incluir imagenes
 \usepackage{graphicx}
 
 %%para la bibliografía
 %%cambia el nombre
-\renewcommand\bibname{Referencias Bibliográficas}
 %%la agrega al indice
 \usepackage[nottoc,numbib]{tocbibind}
 
 %%para los capítulos
 \makeatletter
 \def\@makechapterhead#1{%
-  \vspace*{50\p@}%
   {\parindent \z@ \raggedright \normalfont
     \ifnum \c@secnumdepth >\m@ne
         \huge\bfseries \space \thechapter\space
@@ -103,7 +99,7 @@
     \fi
     \interlinepenalty\@M
     \Huge \bfseries #1\par\nobreak
-    \vskip 40\p@
+    \vskip 30\p@
   }}
   \makeatother
   
@@ -229,12 +225,12 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%% cambiar idioma cosas
 %\renewcommand{\figurename}{Fig.}
-\renewcommand\spanishfigurename{Figura}
-\renewcommand\spanishtablename{Tabla}
-\addto\captionsspanish{%http://stackoverflow.com/a/9106469/4671917
-  \renewcommand{\lstlistingname}%
-{Código}%
- }
+% \renewcommand\spanishfigurename{Figura}
+% \renewcommand\spanishtablename{Tabla}
+% \addto\captionsspanish{%http://stackoverflow.com/a/9106469/4671917
+%   \renewcommand{\lstlistingname}%
+% {Código}%
+%  }
 
 %%%%%%%%%%%%%%%%%%%%%%%% listas con mas elementos
 \usepackage{enumitem}
