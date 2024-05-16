@@ -3,6 +3,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from tqdm.auto import tqdm
 
 
 class PositionalEncoder(nn.Module):
@@ -69,6 +70,8 @@ class MultiHeadAttention(nn.Module):
         self.attn = ScaledDotProductAttention(self.depth)
 
         self.out = nn.Linear(d_model, d_model, bias=bias)
+
+        self._reset_params()
 
     def _reset_params(self):
         nn.init.xavier_uniform_(self.q_linear.weight)
@@ -205,7 +208,109 @@ class TransformerClassifier(nn.Module):
         attn_matrices = self.transformer.get_attn_matrices(x, mask=mask)
         
         return attn_matrices
+    
+    def _train_epoch(self, train_loader, criterion, optimizer, device, use_mask=False):
+        self.train()
+        epoch_loss = 0.0
+        total_correct = 0
+        total_samples = 0
 
+        for i, (_, labels, tokens) in enumerate(tqdm(train_loader)):
+            labels = labels.type(torch.LongTensor).to(device)
+            tokens = tokens.to(device)
+            optimizer.zero_grad()
+
+            mask = None
+            if use_mask:
+                mask = pad_token_mask(tokens)
+
+            predictions = self(tokens, mask=mask)
+
+            loss = criterion(predictions, labels)
+            loss.backward()
+
+            optimizer.step()
+
+            epoch_loss += loss.item()
+
+            if device.startswith('cuda') or device == 'cpu':
+                preds = torch.argmax(predictions, dim=1)
+            elif device == 'mps':
+                _, preds = predictions.max(1)
+
+            total_correct += (preds == labels).sum().item()
+            total_samples += labels.size(0)
+
+            train_acc = (total_correct / total_samples) * 100
+
+            if i % 100 == 99:
+                print(f"Batch {i + 1}/{len(train_loader)} | Loss: {epoch_loss / (i + 1):.4f} | Acc: {train_acc:.2f}%")
+
+        return epoch_loss, train_acc
+
+    def _val_epoch(self, val_loader, criterion, device, use_mask=False):
+        self.eval()
+
+        val_loss = 0.0
+        total_correct = 0
+        total_samples = 0
+
+        with torch.no_grad():
+            for i, (_, labels, tokens) in enumerate(tqdm(val_loader)):
+                labels = labels.type(torch.LongTensor).to(device)
+                tokens = tokens.to(device)
+
+                mask = None
+                if use_mask:
+                    mask = pad_token_mask(tokens)
+
+                predictions = self(tokens, mask=mask)
+
+                loss = criterion(predictions, labels)
+                val_loss += loss.item()
+
+                if device.startswith('cuda') or device == 'cpu':
+                    preds = torch.argmax(predictions, dim=1)
+                elif device == 'mps':
+                    _, preds = predictions.max(1)
+
+                total_correct += (preds == labels).sum().item()
+                total_samples += labels.size(0)
+
+                val_acc = (total_correct / total_samples) * 100
+
+                if i % 100 == 99:
+                    print(f"Batch {i + 1}/{len(val_loader)} | Loss: {val_loss / (i + 1):.4f} | Acc: {val_acc:.2f}%")
+
+        return val_loss, val_acc
+    
+    def train_model(self, device, epochs, optimizer, criterion, train_dataloader, eval_dataloader = None, use_mask = False):
+        train_loss = []
+        train_acc = []
+        val_loss = []
+        val_acc = []
+
+        for epoch in range(epochs):
+            print(f"Epoch {epoch + 1}/{epochs}")
+            epoch_loss, epoch_acc = self._train_epoch(train_dataloader, criterion, optimizer, device, use_mask=use_mask)
+            train_loss.append(epoch_loss)
+            train_acc.append(epoch_acc)
+
+            if eval_dataloader:
+                val_epoch_loss, val_epoch_acc = self._val_epoch(eval_dataloader, criterion, device, use_mask=use_mask)
+                val_loss.append(val_epoch_loss)
+                val_acc.append(val_epoch_acc)
+
+            print(f"Train Loss: {epoch_loss:.4f} | Train Acc: {epoch_acc:.2f}%")
+            if eval_dataloader:
+                print(f"Val Loss: {val_epoch_loss:.4f} | Val Acc: {val_epoch_acc:.2f}%")
+            
+        return train_loss, train_acc, val_loss, val_acc
+
+    def eval_model(self, device, test_dataloader, criterion, use_mask=False):
+        test_loss, test_acc = self._val_epoch(test_dataloader, criterion, device, use_mask=use_mask)
+        print(f"Test Loss: {test_loss:.4f} | Test Acc: {test_acc:.2f}%")
+        return test_loss, test_acc
 
 def pad_token_mask(input_ids, pad_token=1):
     return (input_ids != pad_token).unsqueeze(1).type(torch.uint8)
