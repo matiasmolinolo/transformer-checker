@@ -48,7 +48,7 @@ class DyckLanguageTokenizer:
 
         if remove_special_tokens:
             return [
-                "".join(i_to_c(i.item()) for i in seq[1:] if i != self.PAD_TOKEN and i != self.END_TOKEN) for seq in tokens
+                "".join(i_to_c(i.item()) for i in seq[1:] if i != self.START_TOKEN and i != self.END_TOKEN) for seq in tokens
             ]
         return [" ".join(i_to_c(i.item()) for i in seq) for seq in tokens]
     
