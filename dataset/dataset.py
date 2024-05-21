@@ -37,7 +37,7 @@ class DyckLanguageTokenizer:
 
         return torch.tensor(tokenized, dtype=torch.float)
 
-    def decode(self, tokens):
+    def decode(self, tokens, remove_special_tokens=True):
         if tokens.ndim < 2:
             raise ValueError("Needs to have a batch dimension.")
 
@@ -46,9 +46,14 @@ class DyckLanguageTokenizer:
                 return self.i_to_tok[i]
             raise ValueError(f"Index {i} not in vocabulary")
 
-        return [
-            "".join(i_to_c(i.item()) for i in seq[1:] if i != self.PAD_TOKEN and i != self.END_TOKEN) for seq in tokens
-        ]
+        if remove_special_tokens:
+            return [
+                "".join(i_to_c(i.item()) for i in seq[1:] if i != self.START_TOKEN and i != self.END_TOKEN) for seq in tokens
+            ]
+        return [" ".join(i_to_c(i.item()) for i in seq) for seq in tokens]
+    
+    def decode_single(self, tokens, remove_special_tokens=True):
+        return self.decode(tokens.unsqueeze(0), remove_special_tokens=remove_special_tokens)[0]
 
     def __repr__(self):
         return f"DyckLanguageTokenizer(vocab={self.vocab!r})"

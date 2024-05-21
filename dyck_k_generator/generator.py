@@ -77,7 +77,7 @@ def _generate_unbalanced_string(order: int, length: int, seed: int = 42) -> str:
     return unbalanced_str
 
 
-def _generate_samples(n: int, k: int, max_length: int = 1024, balanced: float = 0.5, seed: int = 42) -> List[str]:
+def _generate_samples(n: int, k: int, min_length: int = 2, max_length: int = 1024, balanced: float = 0.5, seed: int = 42) -> List[str]:
     """
     Generate a list of 'n' strings of length at most 'max_length' from the Dyck language of order 'k'.
     These strings may or may not be members of the Dyck language of order 'k'.
@@ -89,6 +89,7 @@ def _generate_samples(n: int, k: int, max_length: int = 1024, balanced: float = 
     Args:
         n (int): The number of strings to generate.
         k (int): The order of the Dyck language.
+        min_length (int): The minimum length of the strings to generate.
         max_length (int): The maximum length of the strings to generate.
         balanced (float): The proportion of balanced strings to generate.
         seed (int): The seed for the random number generator.
@@ -98,11 +99,11 @@ def _generate_samples(n: int, k: int, max_length: int = 1024, balanced: float = 
     random.seed(seed)
 
     balanced_strings = [
-        _generate_balanced_string(k, random.randint(2, max_length))
+        _generate_balanced_string(k, random.randint(min_length, max_length))
         for _ in tqdm(range(int(n * balanced)), desc="Generating balanced strings")
     ]
     unbalanced_strings = [
-        _generate_unbalanced_string(k, random.randint(2, max_length))
+        _generate_unbalanced_string(k, random.randint(min_length, max_length))
         for _ in tqdm(range(n - len(balanced_strings)), desc="Generating unbalanced strings")
     ]
 
@@ -112,6 +113,9 @@ def _generate_samples(n: int, k: int, max_length: int = 1024, balanced: float = 
     assert all(
         len(s) <= max_length for s in balanced_strings + unbalanced_strings
     ), "Some strings exceed the maximum length."
+    assert all(
+        len(s) >= min_length for s in balanced_strings + unbalanced_strings
+    ), "Some strings are shorter than the minimum length."
     assert all(
         checker.is_dyck_word(s, k) for s in balanced_strings
     ), "Some balanced strings are not members of the Dyck language."
@@ -128,6 +132,7 @@ def _generate_samples(n: int, k: int, max_length: int = 1024, balanced: float = 
 def generate_dataset(
     n: Annotated[int, typer.Option(help="The number of strings to generate.")] = 500_000,
     k: Annotated[int, typer.Option(help="The order of the Dyck language.")] = 3,
+    min_length: Annotated[int, typer.Option(help="The minimum length of the strings to generate.")] = 2,
     max_length: Annotated[int, typer.Option(help="The maximum length of the strings to generate.")] = 1024,
     balanced: Annotated[float, typer.Option(help="The proportion of balanced strings to generate.")] = 0.5,
     file: Annotated[
@@ -136,7 +141,7 @@ def generate_dataset(
             help="If present, the dataset will be saved to a file, otherwise it will be returned to a variable."
         ),
     ] = True,
-) -> List[Tuple[str, bool]] | None:
+) -> List[Tuple[str, bool]] | str:
     """
     Generate a list of 'n' strings of length at most 'max_length' from the Dyck language of order 'k'.
     These strings may or may not be members of the Dyck language of order 'k'.
@@ -153,10 +158,10 @@ def generate_dataset(
         path (str): The path to save the generated strings - if None, the list will be returned to a variable.
 
     Returns:
-        List[Tuple[str, bool]]|None: A list of dictionaries that contain (str, bool), where string is the Dyck-k member string and class is its membership to the language.
+        List[Tuple[str, bool]]|str: A list of dictionaries that contain (str, bool), where string is the Dyck-k member string and class is its membership to the language or the path to the file.
     """
 
-    strings: List[str] = _generate_samples(n, k, max_length, balanced)
+    strings: List[str] = _generate_samples(n, k, min_length, max_length, balanced)
     dataset = [(s, checker.is_dyck_word(s, k)) for s in strings]
 
     if file:
@@ -170,6 +175,7 @@ def generate_dataset(
             f.write(json_record + "\n")
         print(f"Dataset saved to {path}")
         f.close()
+        return path
     else:
         return dataset
 
