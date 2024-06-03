@@ -15,10 +15,10 @@ def min_max_normalize(matrix):
     min_val = np.min(matrix)
     max_val = np.max(matrix)
     normalized_matrix = (matrix - min_val) / (max_val - min_val)
-    return normalized_matrix
+    return 2 * normalized_matrix - 1
 
 def plot_attn_matrices(vocab, batch, model, norm, mask):
-    _, labels, tokens = batch
+    _, _, tokens = batch
     attn_matrices = model.get_attn_matrices(tokens, mask=mask(tokens))
     tokenizer = DyckLanguageTokenizer(vocab)
 
@@ -74,7 +74,7 @@ def plot_attn_matrices(vocab, batch, model, norm, mask):
                 ax.text(
                     j,
                     i,
-                    f"{norm_matrix[i, j]:.4f}",
+                    f"{norm_matrix[i, j]:.3f}",
                     ha="center",
                     va="center",
                     color="black",

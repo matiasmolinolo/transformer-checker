@@ -209,11 +209,14 @@ class TransformerClassifier(nn.Module):
         
         return attn_matrices
     
-    def _train_epoch(self, train_loader, criterion, optimizer, device, use_mask=False):
+    def _train_epoch(self, train_loader, criterion, optimizer, device, use_mask='bidirectional'):
         self.train()
         epoch_loss = 0.0
         total_correct = 0
         total_samples = 0
+
+        if use_mask not in ['causal', 'bidirectional', 'none']:
+            raise ValueError("use_mask should be either 'causal', 'bidirectional' or 'none'")
 
         for i, (_, labels, tokens) in enumerate(tqdm(train_loader)):
             labels = labels.type(torch.LongTensor).to(device)
@@ -221,8 +224,12 @@ class TransformerClassifier(nn.Module):
             optimizer.zero_grad()
 
             mask = None
-            if use_mask:
+            if use_mask == 'bidirectional':
                 mask = pad_token_mask(tokens)
+            elif use_mask == 'causal':
+                mask = causal_mask(tokens)
+            elif use_mask == 'none':
+                mask = None
 
             predictions = self(tokens, mask=mask)
 
@@ -243,14 +250,20 @@ class TransformerClassifier(nn.Module):
 
             train_acc = (total_correct / total_samples) * 100
 
+            if i % 100 == 99:
+                    print(f"Train Loss: {loss:.4f} | Train Accuracy: {train_acc:.2f}%")
+
         return epoch_loss, train_acc
 
-    def _val_epoch(self, val_loader, criterion, device, use_mask=False):
+    def _val_epoch(self, val_loader, criterion, device, use_mask='bidirectional'):
         self.eval()
 
         val_loss = 0.0
         total_correct = 0
         total_samples = 0
+
+        if use_mask not in ['causal', 'bidirectional', 'none']:
+            raise ValueError("use_mask should be either 'causal', 'bidirectional' or 'none'")
 
         with torch.no_grad():
             for i, (_, labels, tokens) in enumerate(tqdm(val_loader)):
@@ -258,8 +271,12 @@ class TransformerClassifier(nn.Module):
                 tokens = tokens.to(device)
 
                 mask = None
-                if use_mask:
+                if use_mask == 'bidirectional':
                     mask = pad_token_mask(tokens)
+                elif use_mask == 'causal':
+                    mask = causal_mask(tokens)
+                elif use_mask == 'none':
+                    mask = None
 
                 predictions = self(tokens, mask=mask)
 
@@ -276,9 +293,12 @@ class TransformerClassifier(nn.Module):
 
                 val_acc = (total_correct / total_samples) * 100
 
+                if i % 100 == 99:
+                    print(f"Validation Loss: {val_loss:.4f} | Validation Accuracy: {val_acc:.2f}%")
+
         return val_loss, val_acc
     
-    def train_model(self, device, epochs, optimizer, criterion, train_dataloader, eval_dataloader = None, use_mask = False):
+    def train_model(self, device, epochs, optimizer, criterion, train_dataloader, eval_dataloader = None, use_mask = 'bidirectional'):
         train_loss = []
         train_acc = []
         val_loss = []
@@ -301,10 +321,13 @@ class TransformerClassifier(nn.Module):
             
         return train_loss, train_acc, val_loss, val_acc
 
-    def eval_model(self, device, test_dataloader, criterion, use_mask=False):
+    def eval_model(self, device, test_dataloader, criterion, use_mask='bidirectional'):
         test_loss, test_acc = self._val_epoch(test_dataloader, criterion, device, use_mask=use_mask)
         print(f"Test Loss: {test_loss:.4f} | Test Acc: {test_acc:.2f}%")
         return test_loss, test_acc
 
 def pad_token_mask(input_ids, pad_token=1):
     return (input_ids != pad_token).unsqueeze(1).type(torch.uint8)
+
+def causal_mask(input_ids):
+    return torch.tril(torch.ones(input_ids.size(1), input_ids.size(1))).unsqueeze(0).type(torch.uint8).to(device=input_ids.device)
