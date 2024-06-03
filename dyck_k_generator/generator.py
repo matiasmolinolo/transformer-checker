@@ -51,6 +51,7 @@ def _generate_balanced_string(order: int, length: int, seed: int = 42) -> str:
     # s -> eps
     # s -> (s)s
 
+
 def _generate_unbalanced_string(order: int, length: int, seed: int = 42) -> str:
     """
     Generate a string of length `length` that is not necessarily from the Dyck language of order `order`.
@@ -77,7 +78,9 @@ def _generate_unbalanced_string(order: int, length: int, seed: int = 42) -> str:
     return unbalanced_str
 
 
-def _generate_samples(n: int, k: int, min_length: int = 2, max_length: int = 1024, balanced: float = 0.5, seed: int = 42) -> List[str]:
+def _generate_samples(
+    n: int, k: int, min_length: int = 2, max_length: int = 1024, balanced: float = 0.5, seed: int = 42
+) -> List[str]:
     """
     Generate a list of 'n' strings of length at most 'max_length' from the Dyck language of order 'k'.
     These strings may or may not be members of the Dyck language of order 'k'.
@@ -95,7 +98,7 @@ def _generate_samples(n: int, k: int, min_length: int = 2, max_length: int = 102
         seed (int): The seed for the random number generator.
     Returns:
         List[str]: A list of 'n' strings of length at most 'max_length' from the Dyck language of order 'k'."""
-    
+
     random.seed(seed)
 
     balanced_strings = [

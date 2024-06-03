@@ -31,7 +31,7 @@ class PositionalEncoder(nn.Module):
         x = self.dropout(x)
 
         return x
-    
+
 
 class ScaledDotProductAttention(nn.Module):
     def __init__(self, scale):
@@ -86,7 +86,7 @@ class MultiHeadAttention(nn.Module):
 
     def forward(self, q, k, v, mask=None, return_attn=False):
         batch_size = q.size(0)
-    
+
         q = self.q_linear(q).view(batch_size, -1, self.n_heads, self.depth).transpose(1, 2)
         k = self.k_linear(k).view(batch_size, -1, self.n_heads, self.depth).transpose(1, 2)
         v = self.v_linear(v).view(batch_size, -1, self.n_heads, self.depth).transpose(1, 2)
@@ -108,10 +108,7 @@ class EncoderBlock(nn.Module):
         self.attn = MultiHeadAttention(n_heads=n_heads, d_model=d_model, dropout=dropout)
 
         self.ff = nn.Sequential(
-            nn.Linear(d_model, dim_ff), 
-            nn.Dropout(dropout), 
-            nn.ReLU(inplace=True), 
-            nn.Linear(dim_ff, d_model)
+            nn.Linear(d_model, dim_ff), nn.Dropout(dropout), nn.ReLU(inplace=True), nn.Linear(dim_ff, d_model)
         )
 
         self.ln1 = nn.LayerNorm(d_model)
@@ -133,10 +130,7 @@ class TransformerEncoder(nn.Module):
     def __init__(self, n_layers, d_model, n_heads, dim_ff, dropout=0.1):
         super().__init__()
         self.layers = nn.ModuleList(
-            [
-                EncoderBlock(d_model=d_model, n_heads=n_heads, dim_ff=dim_ff, dropout=dropout)
-                for _ in range(n_layers)
-            ]
+            [EncoderBlock(d_model=d_model, n_heads=n_heads, dim_ff=dim_ff, dropout=dropout) for _ in range(n_layers)]
         )
 
     def forward(self, x, mask=None):
@@ -150,9 +144,9 @@ class TransformerEncoder(nn.Module):
         for layer in self.layers:
             _, attn_weights = layer.attn(q=x, k=x, v=x, mask=mask, return_attn=True)
             attn_matrices.append(attn_weights)
-        
+
         return attn_matrices
-    
+
 
 class TransformerClassifierConfig:
     def __init__(self, vocab_size, d_model, n_heads, dim_ff, n_layers, n_classes, max_seq_len):
@@ -192,30 +186,30 @@ class TransformerClassifier(nn.Module):
     def forward(self, x, mask=None):
         x = x.long()
         x = self.embedding(x)
-        
+
         x = self.transformer(x, mask=mask)
 
         x = x[:, 0]
         x = self.fc(x)
 
         return x
-    
+
     @torch.no_grad()
     def get_attn_matrices(self, x, mask=None):
         x = x.long()
         x = self.embedding(x)
-        
+
         attn_matrices = self.transformer.get_attn_matrices(x, mask=mask)
-        
+
         return attn_matrices
-    
-    def _train_epoch(self, train_loader, criterion, optimizer, device, use_mask='bidirectional'):
+
+    def _train_epoch(self, train_loader, criterion, optimizer, device, use_mask="bidirectional"):
         self.train()
         epoch_loss = 0.0
         total_correct = 0
         total_samples = 0
 
-        if use_mask not in ['causal', 'bidirectional', 'none']:
+        if use_mask not in ["causal", "bidirectional", "none"]:
             raise ValueError("use_mask should be either 'causal', 'bidirectional' or 'none'")
 
         for i, (_, labels, tokens) in enumerate(tqdm(train_loader)):
@@ -224,11 +218,11 @@ class TransformerClassifier(nn.Module):
             optimizer.zero_grad()
 
             mask = None
-            if use_mask == 'bidirectional':
+            if use_mask == "bidirectional":
                 mask = pad_token_mask(tokens)
-            elif use_mask == 'causal':
+            elif use_mask == "causal":
                 mask = causal_mask(tokens)
-            elif use_mask == 'none':
+            elif use_mask == "none":
                 mask = None
 
             predictions = self(tokens, mask=mask)
@@ -240,9 +234,9 @@ class TransformerClassifier(nn.Module):
 
             epoch_loss += loss.item()
 
-            if device.startswith('cuda') or device == 'cpu':
+            if device.startswith("cuda") or device == "cpu":
                 preds = torch.argmax(predictions, dim=1)
-            elif device == 'mps':
+            elif device == "mps":
                 _, preds = predictions.max(1)
 
             total_correct += (preds == labels).sum().item()
@@ -251,18 +245,18 @@ class TransformerClassifier(nn.Module):
             train_acc = (total_correct / total_samples) * 100
 
             if i % 100 == 99:
-                    print(f"Train Loss: {loss:.4f} | Train Accuracy: {train_acc:.2f}%")
+                print(f"Train Loss: {loss:.4f} | Train Accuracy: {train_acc:.2f}%")
 
         return epoch_loss, train_acc
 
-    def _val_epoch(self, val_loader, criterion, device, use_mask='bidirectional'):
+    def _val_epoch(self, val_loader, criterion, device, use_mask="bidirectional"):
         self.eval()
 
         val_loss = 0.0
         total_correct = 0
         total_samples = 0
 
-        if use_mask not in ['causal', 'bidirectional', 'none']:
+        if use_mask not in ["causal", "bidirectional", "none"]:
             raise ValueError("use_mask should be either 'causal', 'bidirectional' or 'none'")
 
         with torch.no_grad():
@@ -271,11 +265,11 @@ class TransformerClassifier(nn.Module):
                 tokens = tokens.to(device)
 
                 mask = None
-                if use_mask == 'bidirectional':
+                if use_mask == "bidirectional":
                     mask = pad_token_mask(tokens)
-                elif use_mask == 'causal':
+                elif use_mask == "causal":
                     mask = causal_mask(tokens)
-                elif use_mask == 'none':
+                elif use_mask == "none":
                     mask = None
 
                 predictions = self(tokens, mask=mask)
@@ -283,9 +277,9 @@ class TransformerClassifier(nn.Module):
                 loss = criterion(predictions, labels)
                 val_loss += loss.item()
 
-                if device.startswith('cuda') or device == 'cpu':
+                if device.startswith("cuda") or device == "cpu":
                     preds = torch.argmax(predictions, dim=1)
-                elif device == 'mps':
+                elif device == "mps":
                     _, preds = predictions.max(1)
 
                 total_correct += (preds == labels).sum().item()
@@ -297,8 +291,10 @@ class TransformerClassifier(nn.Module):
                     print(f"Validation Loss: {val_loss:.4f} | Validation Accuracy: {val_acc:.2f}%")
 
         return val_loss, val_acc
-    
-    def train_model(self, device, epochs, optimizer, criterion, train_dataloader, eval_dataloader = None, use_mask = 'bidirectional'):
+
+    def train_model(
+        self, device, epochs, optimizer, criterion, train_dataloader, eval_dataloader=None, use_mask="bidirectional"
+    ):
         train_loss = []
         train_acc = []
         val_loss = []
@@ -318,16 +314,23 @@ class TransformerClassifier(nn.Module):
             print(f"Train Loss: {epoch_loss:.4f} | Train Acc: {epoch_acc:.2f}%")
             if eval_dataloader:
                 print(f"Val Loss: {val_epoch_loss:.4f} | Val Acc: {val_epoch_acc:.2f}%")
-            
+
         return train_loss, train_acc, val_loss, val_acc
 
-    def eval_model(self, device, test_dataloader, criterion, use_mask='bidirectional'):
+    def eval_model(self, device, test_dataloader, criterion, use_mask="bidirectional"):
         test_loss, test_acc = self._val_epoch(test_dataloader, criterion, device, use_mask=use_mask)
         print(f"Test Loss: {test_loss:.4f} | Test Acc: {test_acc:.2f}%")
         return test_loss, test_acc
 
+
 def pad_token_mask(input_ids, pad_token=1):
     return (input_ids != pad_token).unsqueeze(1).type(torch.uint8)
 
+
 def causal_mask(input_ids):
-    return torch.tril(torch.ones(input_ids.size(1), input_ids.size(1))).unsqueeze(0).type(torch.uint8).to(device=input_ids.device)
+    return (
+        torch.tril(torch.ones(input_ids.size(1), input_ids.size(1)))
+        .unsqueeze(0)
+        .type(torch.uint8)
+        .to(device=input_ids.device)
+    )
