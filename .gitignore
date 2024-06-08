@@ -521,4 +521,6 @@ TSWLatexianTemp*
 # glossaries
 *.glstex
 
+wandb/
+
 # End of https://www.toptal.com/developers/gitignore/api/latex
