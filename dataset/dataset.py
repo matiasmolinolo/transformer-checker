@@ -48,10 +48,11 @@ class DyckLanguageTokenizer:
 
         if remove_special_tokens:
             return [
-                "".join(i_to_c(i.item()) for i in seq[1:] if i != self.START_TOKEN and i != self.END_TOKEN) for seq in tokens
+                "".join(i_to_c(i.item()) for i in seq[1:] if i != self.START_TOKEN and i != self.END_TOKEN)
+                for seq in tokens
             ]
         return [" ".join(i_to_c(i.item()) for i in seq) for seq in tokens]
-    
+
     def decode_single(self, tokens, remove_special_tokens=True):
         return self.decode(tokens.unsqueeze(0), remove_special_tokens=remove_special_tokens)[0]
 
