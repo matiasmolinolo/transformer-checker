@@ -68,5 +68,30 @@ Should $X$ be a variable in $\mathcal{G}$, then:
 $$
 \mathcal{L}_{\mathcal{G}}(X) = \{ w \in \mathbf{T}^* | X \xrightarrow{*} w\}
 $$
-From this, we derive that $\mathcal{L}(\mathcal{G}) = \mathcal{L}_{\mathcal{G}}(S)$
+From this, we derive that $\mathcal{L}(\mathcal{G}) = \mathcal{L}_{\mathcal{G}}(S)$. If two grammars generate the same language, they are considered \emph{equivalent} \cite{leeuwen-cfg}.
+
 \section{Dyck-$k$ Languages}
+
+Dyck-$k$ languages are a canonical family of context-free languages, composed of strings of balanced parentheses.
+A Dyck-$k$ language is defined as a set of strings over the alphabet $\Sigma = \{ a_1, \bar{a_1}, \dots a_n, \bar{a_n}\}$, where each string is a sequence of $2k$ parentheses, such that the parentheses are balanced. 
+That is, for each string $w \in \Sigma^*$, the number of opening parentheses is equal to the number of closing parentheses, and for each prefix $w'$ of $w$, the number of opening parentheses is greater than or equal to the number of closing parentheses.
+
+The language of Dyck-$k$ is denoted by $D_k$ and is defined by the following grammar:
+\begin{align*}
+    \mathbf{V} &= \{S\} \\
+    \mathbf{T} &= \{a_1, \dots a_n\} \cup \{ \bar{a_1}, \dots, \bar{a_n} \}\\
+    \mathbf{P} &= \{ S \rightarrow a_i S \bar{a_i} S | \epsilon \} \text{ for } i = 1, \dots, n \\
+    \mathbf{S} &= \epsilon
+\end{align*}
+
+In this case, $\mathbf{T}$ is called a \emph{matched alphabet}, as each symbol $a_i$ has a corresponding closing symbol $\bar{a_i}$.
+
+We say that Dyck-$k$ languages are canonical because they are the simplest form of context-free languages and can be used as a building block 
+for all other context-free languages. This is known as the Chomsky-Sch{\"u}tzenberger Theorem \cite{rozenberg1997handbook} and states that a language $\mathcal{L}$ over an alphabet $\Sigma$ is context-free iff there exists:
+\begin{itemize}
+    \item a matched alphabet $T \cup T'$,
+    \item a regular language $R$ over $T \cup T'$,
+    \item a homomorphism $h: {(T \cup T')}^* \rightarrow \Sigma^*$
+\end{itemize}
+
+such that $\mathcal{L} = h(R \cap D_k)$ for some $k$.
