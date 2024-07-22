@@ -14,7 +14,7 @@ Chomsky defines a grammar as a ``device that enumerates the sentences of a langu
 
 Furthermore, Chomsky proposes that these grammars, ordered by increasing restrictions, can be recognized by different automata - Turing machines, linear-bounded automata (LBA), pushdown automata (PDA) or Finite State Machines (FSM), as seen in \ref{fig:chomsky-fig}.
 
-For this work, we will focus on Type-2, or Context-Free Grammars, which can be recognized by pushdown automata, which have a ``natural, recursive notation'' \cite{hopcroft-automata}. For example, palindromes are a context-free language, as the grammar that generates it is also context-free.
+For this work, we will focus on Type-2, or context-free grammars, which can be recognized by pushdown automata, which have a ``natural, recursive notation'' \cite{hopcroft-automata}. For example, palindromes are a context-free language, as the grammar that generates it is also context-free.
 
 \begin{figure}[h]
     \centering
@@ -27,8 +27,8 @@ For this work, we will focus on Type-2, or Context-Free Grammars, which can be r
     
         % Add labels inside each ellipse
         \node at (0, -2.6) {Recursively Enumerable - Type 0};
-        \node at (0, -1.4) {Context-Sensitive - Type 1};
-        \node at (0, -0.1) {Context-Free - Type 2};
+        \node at (0, -1.4) {Context-sensitive - Type 1};
+        \node at (0, -0.1) {Context-free - Type 2};
         \node at (0, 1.5) {Regular - Type 3};
 
         \node at (3.1, 1.1) {\textbf{FSM}};
@@ -41,7 +41,7 @@ For this work, we will focus on Type-2, or Context-Free Grammars, which can be r
     \label{fig:chomsky-fig}
 \end{figure}
 
-\section{Context-Free Grammars}
+\section{Context-free grammars}
 
 A context free grammar $\mathcal{G}$ has four main components \cite{hopcroft-automata}\cite{leeuwen-cfg}:
 \begin{enumerate}
@@ -89,9 +89,11 @@ In this case, $\mathbf{T}$ is called a \emph{matched alphabet}, as each symbol $
 We say that Dyck-$k$ languages are canonical because they are the simplest form of context-free languages and can be used as a building block 
 for all other context-free languages. This is known as the Chomsky-Sch{\"u}tzenberger Theorem \cite{rozenberg1997handbook} and states that a language $\mathcal{L}$ over an alphabet $\Sigma$ is context-free iff there exists:
 \begin{itemize}
-    \item a matched alphabet $T \cup T'$,
-    \item a regular language $R$ over $T \cup T'$,
+    \item a matched alphabet $T \cup T', |T| = k$,
+    \item a regular language $\mathcal{R}$ over $T \cup T'$,
     \item a homomorphism $h: {(T \cup T')}^* \rightarrow \Sigma^*$
 \end{itemize}
 
-such that $\mathcal{L} = h(R \cap D_k)$ for some $k$.
+such that $\mathcal{L} = h(R \cap D_k)$ for some integer $k$ such that $D_k$ is the Dyck language over $k$ symbols.
+
+It is useful to visualize a matched alphabet  $T \cup T'$ as matched parentheses, with $T$ being the set of opening parentheses and $T'$ the set of closing ones.
