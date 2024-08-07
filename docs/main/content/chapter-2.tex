@@ -1,5 +1,4 @@
 \chapter{On Formal Languages}
-
 Hopcroft, Motwani and Ullman define a language $\mathcal{L}$ as a set of strings chosen from $\Sigma^*$, where $\Sigma$ is a particular alphabet. $\Sigma^*$ denotes the \emph{universal language}, which is the language formed by all possible sequences over an alphabet $\Sigma$. An alphabet is defined as a finite, nonempty set of symbols. \cite{hopcroft-automata}
 
 Furthermore, they define a string or word as a finite sequence of symbols chosen from an alphabet $\Sigma$. Therefore, a word can also be seen as a concatenation of symbols that start with the \emph{empty} or \emph{identity} symbol, $\epsilon$.
@@ -42,8 +41,7 @@ For this work, we will focus on Type-2, or context-free grammars, which can be r
 \end{figure}
 
 \section{Context-free grammars}
-
-A context free grammar $\mathcal{G}$ has four main components \cite{hopcroft-automata}\cite{leeuwen-cfg}:
+A context free grammar $\mathcal{G}$ has four main components \cite{hopcroft-automata, leeuwen-cfg}:
 \begin{enumerate}
     \item A finite set of \emph{variables} $\mathbf{V}$ - these variables represent a language (a set of strings). We note $\mathbf{V}^*$ as the Kleene closure of the set of variables - in essence, the concatenation of zero or more repetitions of elements in the set.
     \item A finite set of symbols $\mathbf{T}$, called \emph{terminals}. Note that $\mathbf{T} \subset \mathbf{V}$. Once again, $\mathbf{T}^*$ is the Kleene closure of the set.
@@ -71,7 +69,6 @@ $$
 From this, we derive that $\mathcal{L}(\mathcal{G}) = \mathcal{L}_{\mathcal{G}}(S)$. If two grammars generate the same language, they are considered \emph{equivalent} \cite{leeuwen-cfg}.
 
 \section{Dyck-$k$ Languages}
-
 Dyck-$k$ languages are a canonical family of context-free languages, composed of strings of balanced parentheses.
 A Dyck-$k$ language is defined as a set of strings over the alphabet $\Sigma = \{ a_1, \bar{a_1}, \dots a_n, \bar{a_n}\}$, where each string is a sequence of $2k$ parentheses, such that the parentheses are balanced. 
 That is, for each string $w \in \Sigma^*$, the number of opening parentheses is equal to the number of closing parentheses, and for each prefix $w'$ of $w$, the number of opening parentheses is greater than or equal to the number of closing parentheses.
@@ -97,3 +94,29 @@ for all other context-free languages. This is known as the Chomsky-Sch{\"u}tzenb
 such that $\mathcal{L} = h(R \cap D_k)$ for some integer $k$ such that $D_k$ is the Dyck language over $k$ symbols.
 
 It is useful to visualize a matched alphabet  $T \cup T'$ as matched parentheses, with $T$ being the set of opening parentheses and $T'$ the set of closing ones.
+\newpage
+We find Dyck-$k$ languages interesting to study as they can showcase subject-verb agreement in common language (english, spanish, etc.) \cite{bounded-hierarchical-languages}, therefore we can consider Dyck-$k$ languages as a sort of building block for common language. We can see an example in \ref{fig:subject-verb-agreement}:
+
+\begin{figure}[h]
+    \centering
+    
+    \tikzset{every picture/.style={line width=0.75pt}} 
+    \begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1]
+        \draw [color={rgb, 255:red, 208; green, 2; blue, 27 }  ,draw opacity=1 ]   (211,69.5) .. controls (284.63,29.7) and (427.56,29.5) .. (494.99,67.92) ;
+        \draw [shift={(496,68.5)}, rotate = 210.2] [color={rgb, 255:red, 208; green, 2; blue, 27 }  ,draw opacity=1 ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+        %Curve Lines [id:da30419908858250166] 
+        \draw [color={rgb, 255:red, 208; green, 2; blue, 27 }  ,draw opacity=1 ]   (263,65.5) .. controls (302.77,49.98) and (339.72,48.57) .. (349.2,65.39) ;
+        \draw [shift={(350,67)}, rotate = 246.61] [color={rgb, 255:red, 208; green, 2; blue, 27 }  ,draw opacity=1 ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+        %Curve Lines [id:da5215279504274137] 
+        \draw [color={rgb, 255:red, 208; green, 2; blue, 27 }  ,draw opacity=1 ]   (263,65.5) .. controls (303.59,49.66) and (374.56,41.17) .. (413.82,66.23) ;
+        \draw [shift={(415,67)}, rotate = 213.69] [color={rgb, 255:red, 208; green, 2; blue, 27 }  ,draw opacity=1 ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+        
+        % Text Node
+        \draw (179,66) node [anchor=north west][inner sep=0.75pt]   [align=left] {\textcolor[rgb]{0.29,0.56,0.89}{(}Laws \textcolor[rgb]{0.29,0.56,0.89}{(}the lawmaker\textcolor[rgb]{0.29,0.56,0.89}{)} \textcolor[rgb]{0.29,0.56,0.89}{[}writes\textcolor[rgb]{0.29,0.56,0.89}{] [}and revises\textcolor[rgb]{0.29,0.56,0.89}{]) [}pass\textcolor[rgb]{0.29,0.56,0.89}{]}.};
+    
+    \end{tikzpicture}
+    \caption{Subject-verb agreement \cite{bounded-hierarchical-languages}}
+    \label{fig:subject-verb-agreement}
+\end{figure}
+
+We see that this subject-verb agreement can be expressed by the Dyck-2 word \textcolor[rgb]{0.29,0.56,0.89}{( ( ) [ ] [ ] ) [ ]}.
