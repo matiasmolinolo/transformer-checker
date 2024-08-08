@@ -3,23 +3,23 @@ Transformers \cite{attention_is_all_you_need} were proposed by Vaswani et al. in
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.6\linewidth]{docs/figs/transformer.png}
+    \includegraphics[width=0.6\linewidth]{figs/transformer.png}
     \caption{Transformer Architecture \cite{attention_is_all_you_need}}
     \label{fig:transformer}
 \end{figure}
 
-As we can see, the architecture lends itself to parallelization, since there are no recurrences or dependencies between inputs, which in turn helps speed up training and inference, but also increases the model's complexity and reduces its interpretability, due to the existence of residual paths, which are paths that add the input without processing to the output that stems from processing that same input, similar to doing $x = x + f(x)$ , layer normalizations and attention mechanisms.
+As we can see, the architecture lends itself to parallelization, since there are no recurrences or dependencies between inputs, which in turn helps speed up training and inference, but also increases the model's complexity and reduces its interpretability, due to the existence of residual paths, also called \emph{residual connections}, which are paths that add the input without processing to the output that stems from processing that same input, similar to doing $x = x + f(x)$ , layer normalizations and attention mechanisms.
 
 For our work, we will focus on Transformer encoder stacks (which we will call encoder-only Transformers hereon forwards) with multi-head attention, as these can be used for sequence classification rather than machine translation or sequence modeling.
 
 These encoder-only Transformers, when used along a feed-forward layer and a softmax layer, can output $n$-class classification probabilities, which we will use to determine if a string belongs to a certain language, after being trained on a dataset composed of strings of balanced and unbalanced parentheses.
 
-Albeit Transformers are known for their state-of-the-art performance on natural language processing tasks, they cannot process words as-is; these inputs need to be mapped to a vector space $\mathbb{R}^d$. To this effect, we will use Ströbl's definition of a \emph{word embedding}, $\text{WE}: \Sigma \rightarrow \mathbb{R}^d$ \cite{strobl2024formal}. 
+Albeit Transformers are known for their state-of-the-art performance on natural language processing tasks, they cannot process words as-is; these inputs need to be mapped to a vector space $\mathbb{R}^d$. To this effect, we will use Ströbl's definition of a \emph{word embedding}, $\text{WE}: \Sigma \rightarrow \mathbb{R}^d$ \cite{strobl2024formal}.
 
 Figure \ref{fig:transformer} displays the full architecture of the original Transformer, with an encoder and decoder, each with its inner components, however, we will deal with a simplified version of this architecture, and we will proceed to explain each part that makes up our encoder-only Transformers.
 
 \section{Attention}
-The attention mechanism is the most important part of this architecture and will be the focus of our study. In short, this mechanism will let the model know the importance of a \emph{token} with respect to all other tokens in the sequence. 
+The attention mechanism is the most important part of this architecture and will be the focus of our study. In short, this mechanism will let the model know the importance of a \emph{token} with respect to all other tokens in the sequence.
 
 This concept was introduced by Badhanau et. al. and is defined as an alignment model \cite{badhanau-attn} that scores matches between inputs at a given position to outputs at another position. Even though this mechanism was applied to recurrent neural networks (RNNs), it is equivalent to the mechanism we will describe next.
 
@@ -67,8 +67,7 @@ We define an attention mask as follows:
 \end{equation}
 We define 2 conditions of interest: $i\leq j$ and $\text{tok}[i] \neq \texttt{<PAD>}$ (pad token masking).
 
-The first condition allows the mechanism to attend ONLY to previous positions, such that the mechanism cannot get information on tokens it has not yet seen - we call this mechanism future or \emph{causal} masking.
+The first condition allows the mechanism to attend \emph{only} to previous positions, such that the mechanism cannot get information on tokens it has not yet seen - we call this mechanism future or \emph{causal} masking.
 The second condition allows for the attention mechanism to ``see'' the sequence as a whole, but considers only tokens that provide information, ignoring special $\texttt{<PAD>}$ tokens, used to unify input sequence lengths.
 
 We will analyze in further detail whether different attention masks have an effect on trainability in a later chapter.
-

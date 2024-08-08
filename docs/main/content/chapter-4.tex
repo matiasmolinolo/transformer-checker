@@ -1,1 +1,17 @@
 \chapter{Trainability of Transformers}
+
+Having already analyzed the Transformer architecture, we will now proceed with a discussion on whether these architectures are
+capable of being trained to recognise context-free grammars.
+
+However, before we dive into this analysis on the \emph{trainability} of Transformers, which will be backed by experimental data, we
+first must analyze whether these architectures are capable of learning context-free grammars or not - in essence,
+are they \emph{expressive} enough to generate an internal model of a context-free grammar?
+
+Bhattamistra et. al. \cite{bhattamistra-transformers-formal-langs} prove that these architectures are expressive enough to recognize
+the Shuffle-Dyck-$k$ family of languages and notes the special case of $k=1$, where Shuffle-Dyck-$k$ is equal to Dyck-1 languages.
+More specifically, Ströbl et. al. \cite{strobl2024formal} specifies that this Transformer is one with soft-attention
+(i.e.: softmax attention, as defined in \ref{chapter:3}) with future masking, positional encoding only, no layer normalization and no residual connections.
+
+In our experiments, we found that this Transformer may be expressive enough to recognize this family of languages, but is not
+trainable enough, however, a Transformer with soft-attention with future masking, positional encoding only, layer normalization and residual connections
+is trainable enough to recognize and generalize to both the training and test datasets, reaching 100\% accuracy and a loss of 0 in both sets.
