@@ -165,9 +165,7 @@ class TransformerClassifier(nn.Module):
     def __init__(self, config: TransformerClassifierConfig):
         super().__init__()
 
-        wandb.init(
-            project="transformer-checker"
-        )
+        wandb.init(project="transformer-checker")
 
         self.d_model = config.d_model
         self.n_layers = config.n_layers
@@ -310,7 +308,7 @@ class TransformerClassifier(nn.Module):
         val_loss = []
         val_acc = []
 
-        wandb.watch(self, log='all', log_freq=50)
+        wandb.watch(self, log="all", log_freq=50)
         for epoch in range(epochs):
             print(f"Epoch {epoch + 1}/{epochs}")
             epoch_loss, epoch_acc = self._train_epoch(train_dataloader, criterion, optimizer, device, use_mask=use_mask)
@@ -329,11 +327,11 @@ class TransformerClassifier(nn.Module):
         return train_loss, train_acc, val_loss, val_acc
 
     def eval_model(self, device, test_dataloader, criterion, use_mask="bidirectional"):
-        wandb.watch(self, log='all', log_freq=50)
+        wandb.watch(self, log="all", log_freq=50)
         test_loss, test_acc = self._val_epoch(test_dataloader, criterion, device, use_mask=use_mask)
         print(f"Test Loss: {test_loss:.4f} | Test Acc: {test_acc:.2f}%")
         return test_loss, test_acc
-    
+
     wandb.finish()
 
 
