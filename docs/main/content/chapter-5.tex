@@ -1,0 +1,133 @@
+\chapter{Experimental Setup}
+
+\section{Dataset}
+
+We built a dataset generator, which allows us to generate $n$ samples of a Dyck-$k$ language with a certain distribution.
+
+\begin{lstlisting}[language=Python, caption=Generate balanced string, label=balanced_generator]
+def _generate_balanced_string(order: int, length: int, seed: int = 42) -> str:
+    """
+    Generate a string of length `length` from the Dyck language of order `order`.
+
+    Args:
+        order (int): The order of the Dyck language.
+        length (int): The length of the string to generate.
+        seed (int): The seed for the random number generator.
+    Returns:
+        str: A string of length `length` from the Dyck language of order `order`.
+    """
+
+    length = length if length % 2 == 0 else length + 1
+
+    stack = []
+    word = ""
+
+    brackets = [(k, v) for k, v in list(c.BRACKETS.items())[:order]]
+
+    half_length = length // 2
+
+    first_half = last_half = 0
+
+    while first_half + last_half < length:
+        if first_half < half_length and (len(stack) == 0 or random.random() < 0.5):
+            opening_bracket, closing_bracket = random.choice(brackets)
+            stack.append(closing_bracket)
+            first_half += 1
+            word += opening_bracket
+        else:
+            bracket = stack.pop()
+            last_half += 1
+            word += bracket
+
+    return word
+\end{lstlisting}
+
+We select a subset of $k$ pairs of opening and closing brackets from all our available brackets, which will be our alphabet.
+
+Our algorithm to generate a Dyck-$k$ word uses a stack, in which closing brackets are added while the amount of opening brackets is less than the length of half the word, the stack is empty or a random number from 0 to 1 is less than $0.5$. We also add the opening bracket to the word we are generating
+
+If these conditions are not met, we add 1 to the counter of closing brackets, add the closing bracket to the word we are generating and pop the bracket from the stack.
+
+This process is repeated while the word is less than the desired length.
+
+\begin{lstlisting}[language=Python, caption=Generate unbalanced string, label=code:unbalanced_generator]
+def _generate_unbalanced_string(order: int, length: int, seed: int = 42) -> str:
+    """
+    Generate a string of length `length` that is not necessarily from the Dyck language of order `order`.
+
+    Args:
+        order (int): The order of the Dyck language.
+        length (int): The length of the string to generate.
+        seed (int): The seed for the random number generator.
+    Returns:
+        str: A string of length `length` that is not necessarily from the Dyck language of order `order`.
+    """
+    random.seed(seed)
+
+    brackets = [(k, v) for k, v in list(c.BRACKETS.items())[:order]]
+    brackets = [bracket for pair in brackets for bracket in pair]
+
+    unbalanced_str = "".join(random.choice(brackets) for _ in range(length))
+
+    if checker.is_dyck_word(unbalanced_str, order):
+        del unbalanced_str
+        del brackets
+        return _generate_unbalanced_string(order, length)
+
+    return unbalanced_str
+\end{lstlisting}
+
+Once again, we select a subset of $k$ pairs of opening and closing brackets from all our available brackets, and then convert it into a list for easier selection.
+
+We then select a random item from the list until we generate a word with the desired length, and check whether the generated string is balanced - since the process to generate this sample is random, we may generate a balanced string. In this case, we discard the result (to optimize memory usage) and recursively call our function to generate a new unbalanced string.
+
+In both algorithms, we define a seed for our random number generator, in order to guarantee reproducible results.
+
+Finally, we use these functions to generate a dataset composed by $n$ samples with probability $p$ of being balanced (i.e.: $n\times p$ samples are balanced, $n \times (1-p)$ samples are unbalanced). It is useful to note that this dataset class inherits from \verb|torch.utils.data.Dataset|, which will be of use later on when we are training and evaluating our Transformers, as it allows us to easily split the dataset into subsets used for training, validation and evaluation (our train-val-test split) and use \verb|DataLoaders| to easily and appropriately batch our data for training.
+
+\section{Transformers}
+\subsection{TransformerClassifierConfig}
+The practical implementation of our Transformers was done using Pytorch \cite{pytorch}, for ease of training using a GPU. 
+In order to make the process of creating different Transformers easier, we defined a class \verb|TransformerClassifierConfig|, which defines the model's architecture - i.e.: the context length, the hidden dimensions, the number of attention heads and all other relevant architectural parameters.
+
+\begin{lstlisting}[language=Python, caption=TransformerClassifierConfig definition, label=code:classifier_config]
+class TransformerClassifierConfig:
+    def __init__(self, vocab_size, d_model, n_heads, dim_ff, n_layers, n_classes, max_seq_len):
+        self.vocab_size = vocab_size + 3
+        self.d_model = d_model
+        self.n_heads = n_heads
+        self.dim_ff = dim_ff
+        self.n_layers = n_layers
+        self.n_classes = n_classes
+        self.max_seq_len = max_seq_len + 2
+\end{lstlisting}
+
+We find it useful to note that \verb|self.vocab_size| is defined as \verb|vocab_size + 3| in order to consider the three special tokens present in our vocabulary: \verb|[pad]|, \verb|[start]| and \verb|[end]|. Analogously, \verb|self.max_seq_len| is defined as \verb|max_seq_len + 2| for the same reason.
+
+As the purpose of these Transformers is to classify, we provide a way for users to employ these Transformers for either binary or multi-class classification problems.
+
+\subsection{TransformerClassifier}
+
+As we have already defined the Transformer in chapter \ref{chapter:3}, we will only present particular aspects of our implementation that are of use or interesting to readers from an engineering perspective, as other parts of the implementation do not deviate significantly from a typical Pytorch implementation of a Transformer encoder.
+
+Firstly, we find it of interest to discuss differences in implementation based on the device used to store in memory and then train the Transformer. In Pytorch, we must have both the model and dataset on the same device, which can be \verb|cpu|, \verb|cuda| (if we are using an NVIDIA GPU) or \verb|mps| (if we are using Apple Silicon). However, behaviour of functions may differ based on the selected device - we provide an example below.
+
+\begin{lstlisting}[language=Python]
+    if device.startswith("cuda") or device == "cpu":
+        preds = torch.argmax(predictions, dim=1)
+    elif device == "mps":
+        _, preds = predictions.max(1)
+\end{lstlisting}
+
+If we were to use \verb|torch.argmax| on \verb|mps|, we would see that the behaviour is erratic and will not provide us with the expected result, instead, we must use \verb|predictions.max()| and specify we want to reduce over the first dimension by specifying \verb|dim=1|. This returns a tuple of \verb|(values, indices)|, where indices is the index location of each maximum value found (argmax) \cite{pytorch-max}.
+
+\section{Package Architecture and Dependency Management}
+
+The codebase was architected in such a way that it can easily extend the model explainability tool already developed by the University's AI and Big Data Department. We kept external dependencies to a minimum, limiting ourselves to only the strictly necessary. This was done in pursuit of an easier integration with the already existing codebase.
+
+We used \verb|poetry| \cite{poetry} to manage dependencies, as it manages dependencies more cleanly and consistently than \verb|pip|.
+
+Furthermore, we follow Pythonic conventions, making each folder a module by adding an \verb|__init__.py| file, which allows the contents of the folder to be imported across the codebase. Furthermore, we expose command-line tools for generating a dataset and checking whether a string belongs to a Dyck-$k$ language or not. In order to create these tools, we used \verb|typer| \cite{typer}.
+
+\section{Training}
+
