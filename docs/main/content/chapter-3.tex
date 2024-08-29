@@ -1,4 +1,4 @@
-\chapter{Transformer Architecture}
+\chapter{Transformer Architecture} \label{chapter:3}
 Transformers \cite{attention_is_all_you_need} were proposed by Vaswani et al. in 2017. This novel architecture achieved state-of-the-art results in machine translation tasks, while dispensing with recurrent and convolutional architectures, which enabled parallelization and speedup of natural language processing tasks. The Transformer employs an encoder-decoder stack, each with multiple \emph{blocks}, as can be seen in \ref{fig:transformer}. The key mechanism behind this architecture is called \emph{attention}, which we will discuss in detail in a later section.
 
 \begin{figure}[h]
@@ -18,7 +18,7 @@ Albeit Transformers are known for their state-of-the-art performance on natural 
 
 Figure \ref{fig:transformer} displays the full architecture of the original Transformer, with an encoder and decoder, each with its inner components, however, we will deal with a simplified version of this architecture, and we will proceed to explain each part that makes up our encoder-only Transformers.
 
-\section{Attention}
+\section{Attention} \label{section:attention}
 The attention mechanism is the most important part of this architecture and will be the focus of our study. In short, this mechanism will let the model know the importance of a \emph{token} with respect to all other tokens in the sequence.
 
 This concept was introduced by Badhanau et. al. and is defined as an alignment model \cite{badhanau-attn} that scores matches between inputs at a given position to outputs at another position. Even though this mechanism was applied to recurrent neural networks (RNNs), it is equivalent to the mechanism we will describe next.
@@ -57,7 +57,7 @@ Finally, we introduce the concept of \emph{self-attention}, which is simply appl
 
 We find this mechanism (\emph{self-attention}) of interest for our work, as we believe attention will provide information regarding if a certain string of parentheses is balanced, and therefore, information about its membership to a $D_k$ language.
 
-\section{Attention Masks}
+\section{Attention Masks} \label{section:attn_masks}
 We define an attention mask as follows:
 \begin{equation}
     \begin{cases}
