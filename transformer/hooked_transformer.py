@@ -330,9 +330,11 @@ class TransformerClassifier(nn.Module):
         wandb.watch(self, log="all", log_freq=50)
         test_loss, test_acc = self._val_epoch(test_dataloader, criterion, device, use_mask=use_mask)
         print(f"Test Loss: {test_loss:.4f} | Test Acc: {test_acc:.2f}%")
+
+        wandb.finish()
         return test_loss, test_acc
 
-    wandb.finish()
+        
 
 
 def pad_token_mask(input_ids, pad_token=1):
