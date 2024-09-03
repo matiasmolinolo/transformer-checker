@@ -23,66 +23,39 @@ def plot_attn_matrices(vocab, batch, model, norm, mask):
     attn_matrices = model.get_attn_matrices(tokens, mask=mask(tokens))
     tokenizer = DyckLanguageTokenizer(vocab)
 
-    unique_matrices = []
-    unique_labels_set = set()
+    num_layers = len(attn_matrices)
+    num_heads = attn_matrices[0].shape[1]
+    num_samples = attn_matrices[0].shape[0]
 
-    for matrix in range(len(attn_matrices[0])):
-        labels = tokenizer.decode_single(tokens[matrix], remove_special_tokens=False).split(" ")
-        labels_tuple = tuple(labels)  # Convert list to tuple for set comparison
+    # Plot individual samples
+    for sample_idx in range(num_samples):
+        fig, axes = plt.subplots(num_layers, num_heads, figsize=(num_heads * 6, num_layers * 6), dpi=150)
+        if num_layers == 1 and num_heads == 1:
+            axes = np.array([[axes]])
+        elif num_layers == 1 or num_heads == 1:
+            axes = axes.reshape(num_layers, num_heads)
 
-        if labels_tuple not in unique_labels_set:
-            unique_labels_set.add(labels_tuple)
-            unique_matrices.append((matrix, labels))
+        labels = tokenizer.decode_single(tokens[sample_idx], remove_special_tokens=False).split()
 
-    num_unique_matrices = len(unique_matrices)
+        for layer in range(num_layers):
+            for head in range(num_heads):
+                ax = axes[layer, head]
 
-    # Calculate the number of rows and columns for the subplots
-    num_cols = 2  # Adjust this based on your preference
-    num_rows = (num_unique_matrices + num_cols - 1) // num_cols
+                matrix = attn_matrices[layer][sample_idx, head].cpu().detach().numpy()
+                norm_matrix = norm(matrix)
 
-    fig, axes = plt.subplots(num_rows, num_cols, figsize=(num_cols * 15, num_rows * 15))
+                heatmap = ax.imshow(norm_matrix, cmap="coolwarm", interpolation="nearest", aspect='auto')
 
-    # Flatten axes array for easy iteration
-    axes = axes.flatten()
+                ax.set_xticks(range(len(labels)))
+                ax.set_yticks(range(len(labels)))
+                ax.set_xticklabels(labels, fontsize=6, rotation=90)
+                ax.set_yticklabels(labels, fontsize=6)
 
-    for idx, (matrix, labels) in enumerate(unique_matrices):
-        ax = axes[idx]
-        norm_matrix = norm(attn_matrices[0][matrix][0].cpu().detach().numpy())
-        heatmap = ax.imshow(
-            norm_matrix,
-            cmap="coolwarm",
-            interpolation="nearest",
-        )
+                ax.set_title(f"Layer {layer}, Head {head}", fontsize=8)
 
-        x_ticks = list(range(attn_matrices[0][matrix][0].shape[0]))
-        y_ticks = list(range(attn_matrices[0][matrix][0].shape[1]))
+                for i in range(len(labels)):
+                    for j in range(len(labels)):
+                        ax.text(j, i, f"{norm_matrix[i, j]:.2f}", ha="center", va="center", color="black", fontsize=6)
 
-        ax.set_xticks(x_ticks)
-        ax.set_xticklabels(labels, fontsize=14)
-        ax.xaxis.set_ticks_position("top")  # Position x-ticks on top
-        ax.xaxis.set_label_position("top")
-
-        ax.set_yticks(y_ticks)
-        ax.set_yticklabels(labels, fontsize=14)
-
-        cbar = plt.colorbar(heatmap, ax=ax)
-        cbar.set_label("Attention weights", fontsize=14)
-
-        for i in range(len(labels)):
-            for j in range(len(labels)):
-                ax.text(
-                    j,
-                    i,
-                    f"{norm_matrix[i, j]:.3f}",
-                    ha="center",
-                    va="center",
-                    color="black",
-                    fontsize=12,
-                )
-
-    # Hide any unused subplots
-    for ax in axes[num_unique_matrices:]:
-        ax.axis("off")
-
-    plt.tight_layout()
-    plt.show()
+        plt.tight_layout()
+        plt.show()
