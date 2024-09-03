@@ -9,30 +9,56 @@ import wandb
 
 
 class PositionalEncoder(nn.Module):
-    def __init__(self, d_model, max_len=1024, dropout=0.1):
+    def __init__(self, d_model, max_seq_len=5000):
         super().__init__()
         self.d_model = d_model
-        self.dropout = nn.Dropout(dropout)
 
-        pos_enc = torch.zeros(max_len, d_model)
-        pos = torch.arange(0, max_len).unsqueeze(1).float()
+        # Create constant positional encoding
+        pe = torch.zeros(max_seq_len, d_model)
+        position = torch.arange(0, max_seq_len, dtype=torch.float).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
 
-        div_term = 1.0 / torch.pow(10_000, torch.arange(0, d_model, 2).float() / d_model)
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
 
-        pos_enc[:, 0::2] = torch.sin(pos * div_term)
-        pos_enc[:, 1::2] = torch.cos(pos * div_term)
+        pe = pe.unsqueeze(0)
+        self.register_buffer("pe", pe)
 
-        pos_enc = pos_enc.unsqueeze(0)
-
-        self.register_buffer("pos_enc", pos_enc)
+        self.dropout = nn.Dropout(p=0.1)
 
     def forward(self, x):
+        # Make sure x and self.pe have compatible shapes
+        seq_len = x.size(1)
+        pe = self.pe[:, :seq_len, : self.d_model]
+
         x = x * math.sqrt(self.d_model)
+        x = x + pe
+        return self.dropout(x)
 
-        x = x + self.pos_enc[:, : x.size(1), :]
-        x = self.dropout(x)
 
-        return x
+class AbsolutePositionalEncoder(nn.Module):
+    def __init__(self, d_model, max_seq_len=5000):
+        super().__init__()
+        self.d_model = d_model
+
+        pe = torch.zeros(max_seq_len, d_model)
+        for pos in range(max_seq_len):
+            for i in range(d_model):
+                pe[pos, i] = pos / max_seq_len
+
+        pe = pe.unsqueeze(0)
+        self.register_buffer("pe", pe)
+
+        self.dropout = nn.Dropout(p=0.1)
+
+    def forward(self, x):
+        # Make sure x and self.pe have compatible shapes
+        seq_len = x.size(1)
+        pe = self.pe[:, :seq_len, : self.d_model]
+
+        x = x * math.sqrt(self.d_model)
+        x = x + pe
+        return self.dropout(x)
 
 
 class ScaledDotProductAttention(nn.Module):
@@ -151,7 +177,7 @@ class TransformerEncoder(nn.Module):
 
 
 class TransformerClassifierConfig:
-    def __init__(self, vocab_size, d_model, n_heads, dim_ff, n_layers, n_classes, max_seq_len):
+    def __init__(self, vocab_size, d_model, n_heads, dim_ff, n_layers, n_classes, max_seq_len, pos_enc="none"):
         self.vocab_size = vocab_size + 3
         self.d_model = d_model
         self.n_heads = n_heads
@@ -159,6 +185,7 @@ class TransformerClassifierConfig:
         self.n_layers = n_layers
         self.n_classes = n_classes
         self.max_seq_len = max_seq_len + 2
+        self.pos_enc = pos_enc
 
 
 class TransformerClassifier(nn.Module):
@@ -175,7 +202,12 @@ class TransformerClassifier(nn.Module):
         self.dim_ff = config.dim_ff
 
         self.embedding = nn.Embedding(self.vocab_size, self.d_model)
-        self.pos_encoder = PositionalEncoder(self.d_model, config.max_seq_len)
+        if config.pos_enc == "sinusoidal":
+            self.pos_encoder = PositionalEncoder(self.d_model, config.max_seq_len)
+        elif config.pos_enc == "absolute":
+            self.pos_encoder = AbsolutePositionalEncoder(self.d_model, config.max_seq_len)
+        else:
+            self.pos_encoder = None
 
         self.transformer = TransformerEncoder(
             n_layers=self.n_layers,
@@ -190,6 +222,9 @@ class TransformerClassifier(nn.Module):
     def forward(self, x, mask=None):
         x = x.long()
         x = self.embedding(x)
+        if self.pos_encoder:
+            pe_x = self.pos_encoder(x)
+            x = pe_x + x
 
         x = self.transformer(x, mask=mask)
 
@@ -333,8 +368,6 @@ class TransformerClassifier(nn.Module):
 
         wandb.finish()
         return test_loss, test_acc
-
-        
 
 
 def pad_token_mask(input_ids, pad_token=1):

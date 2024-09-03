@@ -40,7 +40,7 @@ def plot_attn_matrices(vocab, batch, model, norm, mask):
     num_cols = 2  # Adjust this based on your preference
     num_rows = (num_unique_matrices + num_cols - 1) // num_cols
 
-    fig, axes = plt.subplots(num_rows, num_cols, figsize=(num_cols * 10, num_rows * 10))
+    fig, axes = plt.subplots(num_rows, num_cols, figsize=(num_cols * 15, num_rows * 15))
 
     # Flatten axes array for easy iteration
     axes = axes.flatten()

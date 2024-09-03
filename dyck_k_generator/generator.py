@@ -23,6 +23,9 @@ def _generate_balanced_string(order: int, length: int, seed: int = 42) -> str:
         str: A string of length `length` from the Dyck language of order `order`.
     """
 
+    if length == 0:
+        return ""
+
     length = length if length % 2 == 0 else length + 1
 
     stack = []
@@ -65,10 +68,19 @@ def _generate_unbalanced_string(order: int, length: int, seed: int = 42) -> str:
     """
     random.seed(seed)
 
-    brackets = [(k, v) for k, v in list(c.BRACKETS.items())[:order]]
-    brackets = [bracket for pair in brackets for bracket in pair]
+    word = ""
 
-    unbalanced_str = "".join(random.choice(brackets) for _ in range(length))
+    opening_brackets = [k for k, _ in list(c.BRACKETS.items())[:order]]
+    closing_brackets = [v for _, v in list(c.BRACKETS.items())[:order]]
+
+    brackets = opening_brackets + closing_brackets
+
+    first_char = random.choice(opening_brackets) if random.random() < 0.5 else random.choice(closing_brackets)
+    word += first_char
+
+    random_brackets = [random.choice(brackets) for _ in range(length - 1)]
+    random.shuffle(random_brackets)
+    unbalanced_str = word + "".join(random_brackets)
 
     if checker.is_dyck_word(unbalanced_str, order):
         del unbalanced_str
@@ -79,7 +91,7 @@ def _generate_unbalanced_string(order: int, length: int, seed: int = 42) -> str:
 
 
 def _generate_samples(
-    n: int, k: int, min_length: int = 2, max_length: int = 1024, balanced: float = 0.5, seed: int = 42
+    n: int, k: int, min_length: int = 0, max_length: int = 1024, balanced: float = 0.5, seed: int = 42
 ) -> List[str]:
     """
     Generate a list of 'n' strings of length at most 'max_length' from the Dyck language of order 'k'.
@@ -163,12 +175,17 @@ def generate_dataset(
     Returns:
         List[Tuple[str, bool]]|str: A list of dictionaries that contain (str, bool), where string is the Dyck-k member string and class is its membership to the language or the path to the file.
     """
+    path = f"data/dyck-{k}_{n}-samples_{max_length}-len_p{str(balanced).replace('.', '')}.jsonl"
+
+    if file:
+        if os.path.exists(path):
+            print(f"File {path} already exists.")
+            return path
 
     strings: List[str] = _generate_samples(n, k, min_length, max_length, balanced)
     dataset = [(s, checker.is_dyck_word(s, k)) for s in strings]
 
     if file:
-        path = f"data/dyck-{k}_{n}-samples_{max_length}-len_p{str(balanced).replace('.', '')}.jsonl"
         if not os.path.exists(path.split("/")[0]):
             print(f"Creating directory: {path.split('/')[0]}")
             os.makedirs(path.split("/")[0])
