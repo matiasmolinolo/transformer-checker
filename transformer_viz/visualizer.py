@@ -48,7 +48,7 @@ def plot_attn_matrices(vocab, batch, model, norm, mask):
 
                 ax.set_xticks(range(len(labels)))
                 ax.set_yticks(range(len(labels)))
-                ax.set_xticklabels(labels, fontsize=6, rotation=90)
+                ax.set_xticklabels(labels, fontsize=6)
                 ax.set_yticklabels(labels, fontsize=6)
 
                 ax.set_title(f"Layer {layer}, Head {head}", fontsize=8)
