@@ -166,6 +166,7 @@ class TransformerClassifier(nn.Module):
         super().__init__()
 
         wandb.init(project="transformer-checker")
+        self.wandb_config = self._init_wandb_config(config)
 
         self.d_model = config.d_model
         self.n_layers = config.n_layers
@@ -173,9 +174,10 @@ class TransformerClassifier(nn.Module):
         self.n_heads = config.n_heads
         self.vocab_size = config.vocab_size
         self.dim_ff = config.dim_ff
+        self.max_seq_len = config.max_seq_len
 
         self.embedding = nn.Embedding(self.vocab_size, self.d_model)
-        self.pos_encoder = PositionalEncoder(self.d_model, config.max_seq_len)
+        self.pos_encoder = PositionalEncoder(self.d_model, self.max_seq_len)
 
         self.transformer = TransformerEncoder(
             n_layers=self.n_layers,
@@ -186,6 +188,18 @@ class TransformerClassifier(nn.Module):
 
         self.fc = nn.Linear(self.d_model, self.n_classes)
         self.attn_head_weights = []
+
+    def _init_wandb_config(self, config):
+        cfg = wandb.config
+        cfg.d_model = config.d_model
+        cfg.n_layers = config.n_layers
+        cfg.n_heads = config.n_heads
+        cfg.dim_ff = config.dim_ff
+        cfg.vocab_size = config.vocab_size
+        cfg.max_seq_len = config.max_seq_len
+        cfg.n_classes = config.n_classes
+
+        return cfg
 
     def forward(self, x, mask=None):
         x = x.long()
@@ -223,6 +237,7 @@ class TransformerClassifier(nn.Module):
 
             mask = None
             if use_mask == "bidirectional":
+                
                 mask = pad_token_mask(tokens)
             elif use_mask == "causal":
                 mask = causal_mask(tokens)
@@ -309,6 +324,7 @@ class TransformerClassifier(nn.Module):
         val_acc = []
 
         wandb.watch(self, log="all", log_freq=50)
+        self.wandb_config.use_mask = use_mask
         for epoch in range(epochs):
             print(f"Epoch {epoch + 1}/{epochs}")
             epoch_loss, epoch_acc = self._train_epoch(train_dataloader, criterion, optimizer, device, use_mask=use_mask)
@@ -327,9 +343,14 @@ class TransformerClassifier(nn.Module):
         return train_loss, train_acc, val_loss, val_acc
 
     def eval_model(self, device, test_dataloader, criterion, use_mask="bidirectional"):
-        wandb.watch(self, log="all", log_freq=50)
+        try:
+            wandb.watch(self, log="all", log_freq=1)
+        except ValueError:
+            wandb.init()
+            wandb.watch(self, log='all', log_freq=1)
         test_loss, test_acc = self._val_epoch(test_dataloader, criterion, device, use_mask=use_mask)
         print(f"Test Loss: {test_loss:.4f} | Test Acc: {test_acc:.2f}%")
+        wandb.log({"test_loss": test_loss, "test_acc": test_acc})
 
         wandb.finish()
         return test_loss, test_acc
