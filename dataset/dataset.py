@@ -2,6 +2,7 @@ import json
 from typing import List
 
 import torch
+import numpy as np
 from torch.utils.data import Dataset
 from tqdm import tqdm
 
@@ -17,25 +18,31 @@ class DyckLanguageTokenizer:
             **self.base_vocab,
         }
         self.i_to_tok = {i: tok for tok, i in self.tok_to_i.items()}
+        
+        # Precompute tokenization mapping
+        self.char_to_token = np.zeros(256, dtype=np.float32)
+        for char, token in self.tok_to_i.items():
+            if len(char) == 1:
+                self.char_to_token[ord(char)] = token
 
     def tokenize(self, strings: str | List[str], max_len=None):
-        def c_to_i(c):
-            if c in self.tok_to_i:
-                return float(self.tok_to_i[c])
-            raise ValueError(f"Character {c} not in vocabulary")
-
         if isinstance(strings, str):
             strings = [strings]
 
         if max_len is None:
             max_len = max((max(len(s) for s in strings)), 1)
 
-        tokenized = [
-            [self.START_TOKEN] + [c_to_i(c) for c in s] + [self.END_TOKEN] + [self.PAD_TOKEN] * (max_len - len(s))
-            for s in tqdm(strings, desc="Tokenizing strings")
-        ]
+        # Vectorized tokenization
+        tokenized = np.zeros((len(strings), max_len + 2), dtype=np.float32)
+        tokenized[:, 0] = self.START_TOKEN
+        
+        for i, s in enumerate(tqdm(strings, desc="Tokenizing strings")):
+            tokenized[i, 1:len(s)+1] = self.char_to_token[[ord(c) for c in s]]
+        
+        # Efficient padding and end token
+        tokenized[np.arange(len(strings)), np.array([len(s) + 1 for s in tqdm(strings, desc="Padding strings")])] = self.END_TOKEN
 
-        return torch.tensor(tokenized, dtype=torch.float)
+        return torch.from_numpy(tokenized)
 
     def decode(self, tokens, remove_special_tokens=True):
         if tokens.ndim < 2:

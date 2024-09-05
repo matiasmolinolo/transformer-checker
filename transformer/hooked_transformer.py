@@ -230,6 +230,7 @@ class TransformerClassifier(nn.Module):
         cfg.vocab_size = config.vocab_size
         cfg.max_seq_len = config.max_seq_len
         cfg.n_classes = config.n_classes
+        cfg.pos_enc = config.pos_enc
 
         return cfg
 
