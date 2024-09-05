@@ -283,14 +283,14 @@ class TransformerClassifier(nn.Module):
 
             train_acc = (total_correct / total_samples) * 100
 
-            wandb.log({"train_loss": loss, "train_acc": train_acc})
+            wandb.log({"train/loss": loss, "train/acc": train_acc})
 
             if i % 100 == 99:
                 print(f"Train Loss: {loss:.4f} | Train Accuracy: {train_acc:.2f}%")
 
         return epoch_loss, train_acc
 
-    def _val_epoch(self, val_loader, criterion, device, use_mask="bidirectional"):
+    def _val_epoch(self, val_loader, criterion, device, use_mask="bidirectional", **kwargs):
         self.eval()
 
         val_loss = 0.0
@@ -328,10 +328,16 @@ class TransformerClassifier(nn.Module):
 
                 val_acc = (total_correct / total_samples) * 100
 
-                wandb.log({"val_loss": loss, "val_acc": val_acc})
+                if kwargs["test"]:
+                    wandb.log({"test/loss": loss, "test/acc": val_acc})
 
-                if i % 100 == 99:
-                    print(f"Validation Loss: {val_loss:.4f} | Validation Accuracy: {val_acc:.2f}%")
+                    if i % 100 == 99:
+                        print(f"Test Loss: {val_loss:.4f} | Test Accuracy: {val_acc:.2f}%")
+                else:
+                    wandb.log({"val/loss": loss, "val/acc": val_acc})
+
+                    if i % 100 == 99:
+                        print(f"Validation Loss: {val_loss:.4f} | Validation Accuracy: {val_acc:.2f}%")
 
         return val_loss, val_acc
 
@@ -351,7 +357,9 @@ class TransformerClassifier(nn.Module):
             train_acc.append(epoch_acc)
 
             if eval_dataloader:
-                val_epoch_loss, val_epoch_acc = self._val_epoch(eval_dataloader, criterion, device, use_mask=use_mask)
+                val_epoch_loss, val_epoch_acc = self._val_epoch(
+                    eval_dataloader, criterion, device, use_mask=use_mask, test=False
+                )
                 val_loss.append(val_epoch_loss)
                 val_acc.append(val_epoch_acc)
 
@@ -362,8 +370,8 @@ class TransformerClassifier(nn.Module):
         return train_loss, train_acc, val_loss, val_acc
 
     def eval_model(self, device, test_dataloader, criterion, use_mask="bidirectional"):
-        wandb.watch(self, log="all", log_freq=50)
-        test_loss, test_acc = self._val_epoch(test_dataloader, criterion, device, use_mask=use_mask)
+        wandb.watch(self, log="all", log_freq=1)
+        test_loss, test_acc = self._val_epoch(test_dataloader, criterion, device, use_mask=use_mask, test=True)
         print(f"Test Loss: {test_loss:.4f} | Test Acc: {test_acc:.2f}%")
 
         wandb.finish()

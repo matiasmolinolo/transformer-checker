@@ -20,12 +20,23 @@ def min_max_normalize(matrix):
 
 def plot_attn_matrices(vocab, batch, model, norm, mask):
     _, _, tokens = batch
+
+    # Filter unique samples
+    unique_tokens = {}
+    for i, token_seq in enumerate(tokens):
+        token_tuple = tuple(token_seq.cpu().numpy())
+        if token_tuple not in unique_tokens:
+            unique_tokens[token_tuple] = i
+
+    unique_indices = list(unique_tokens.values())
+    tokens = tokens[unique_indices]
+
     attn_matrices = model.get_attn_matrices(tokens, mask=mask(tokens))
     tokenizer = DyckLanguageTokenizer(vocab)
 
     num_layers = len(attn_matrices)
     num_heads = attn_matrices[0].shape[1]
-    num_samples = attn_matrices[0].shape[0]
+    num_samples = len(unique_indices)
 
     # Plot individual samples
     for sample_idx in range(num_samples):
@@ -44,7 +55,7 @@ def plot_attn_matrices(vocab, batch, model, norm, mask):
                 matrix = attn_matrices[layer][sample_idx, head].cpu().detach().numpy()
                 norm_matrix = norm(matrix)
 
-                heatmap = ax.imshow(norm_matrix, cmap="coolwarm", interpolation="nearest", aspect='auto')
+                heatmap = ax.imshow(norm_matrix, cmap="coolwarm", interpolation="nearest", aspect="auto")
 
                 ax.set_xticks(range(len(labels)))
                 ax.set_yticks(range(len(labels)))
