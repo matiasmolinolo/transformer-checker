@@ -33,14 +33,15 @@ class DyckLanguageTokenizer:
             max_len = max((max(len(s) for s in strings)), 1)
 
         # Vectorized tokenization
-        tokenized = np.zeros((len(strings), max_len + 2), dtype=np.float32)
+        tokenized = np.full((len(strings), max_len + 2), self.PAD_TOKEN, dtype=np.float32)
         tokenized[:, 0] = self.START_TOKEN
         
+        lengths = np.array([len(s) for s in tqdm(strings, desc="Calculating lengths")])
         for i, s in enumerate(tqdm(strings, desc="Tokenizing strings")):
-            tokenized[i, 1:len(s)+1] = self.char_to_token[[ord(c) for c in s]]
+            tokenized[i, 1:lengths[i]+1] = self.char_to_token[[ord(c) for c in s]]
         
-        # Efficient padding and end token
-        tokenized[np.arange(len(strings)), np.array([len(s) + 1 for s in tqdm(strings, desc="Padding strings")])] = self.END_TOKEN
+        # Efficient end token placement
+        tokenized[np.arange(len(strings)), lengths + 1] = self.END_TOKEN
 
         return torch.from_numpy(tokenized)
 
