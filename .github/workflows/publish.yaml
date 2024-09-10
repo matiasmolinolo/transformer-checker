@@ -54,7 +54,8 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git commit -am "Bump version to ${{ steps.get_tag.outputs.TAG }}"
+          git add pyproject.toml transformer_checker/__init__.py
+          git commit -m "Bump version to ${{ steps.get_tag.outputs.TAG }}"
           git push -f origin master
 
       - name: Package project
