@@ -48,12 +48,12 @@ jobs:
           sed -i "s/__version__ = \".*\"/__version__ = \"${{ steps.get_tag.outputs.TAG }}\"/" transformer_checker/__init__.py
 
       - name: Commit version changes
+        uses: actions/checkout@v4
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add pyproject.toml transformer_checker/__init__.py
-          git commit -m "Bump version to ${{ steps.get_tag.outputs.TAG }}"
-          git push origin HEAD:main
+          git commit -am "Bump version to ${{ steps.get_tag.outputs.TAG }}"
+          git push
 
       - name: Package project
         run: poetry build
