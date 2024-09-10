@@ -16,7 +16,7 @@ jobs:
       url: https://pypi.org/project/transformer-checker/
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -54,7 +54,7 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git commit -am "Bump version to ${{ steps.get_tag.outputs.TAG }}"
-          git push
+          git push HEAD:master
 
       - name: Package project
         run: poetry build
