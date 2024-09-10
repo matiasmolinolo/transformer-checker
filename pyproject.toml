@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "transformer-checker"
-version = "0.1.0"
+version = "0.1.1"
 description = "tool to visualize and check neural activations and attention patterns in transformer models that classify context-free languages"
 authors = ["Matias Molinolo <mm231323@fi365.ort.edu.uy>"]
 readme = "README.md"

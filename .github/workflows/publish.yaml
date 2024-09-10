@@ -6,7 +6,7 @@ on:
       - '*.*.*'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   pypi-publish:
@@ -17,6 +17,7 @@ jobs:
       url: https://pypi.org/project/transformer-checker/
     permissions:
       id-token: write
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -45,6 +46,14 @@ jobs:
 
       - name: Update package version
         run: poetry version ${{ steps.get_tag.outputs.TAG }}
+
+      - name: Commit version change
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add pyproject.toml
+          git commit -m "Bump version to ${{ steps.get_tag.outputs.TAG }}"
+          git push
 
       - name: Package project
         run: poetry build

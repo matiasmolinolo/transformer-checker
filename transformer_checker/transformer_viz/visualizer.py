@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from dataset.dataset import DyckLanguageTokenizer
+from transformer_checker.dataset.dataset import DyckLanguageTokenizer
 
 
 def z_score_normalize(matrix):
@@ -70,3 +70,5 @@ def plot_attn_matrices(vocab, batch, model, norm, mask):
 
         plt.tight_layout()
         plt.show()
+
+__all__ = ['plot_attn_matrices']

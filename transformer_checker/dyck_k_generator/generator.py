@@ -7,8 +7,8 @@ import typer
 from tqdm import tqdm
 from typing_extensions import Annotated
 
-from dyck_k_generator import checker
-from dyck_k_generator import constants as c
+from .checker import is_dyck_word
+from .constants import BRACKETS
 
 
 def _generate_balanced_string(order: int, length: int, seed: int = 42) -> str:
@@ -31,7 +31,7 @@ def _generate_balanced_string(order: int, length: int, seed: int = 42) -> str:
     stack = []
     word = ""
 
-    brackets = [(k, v) for k, v in list(c.BRACKETS.items())[:order]]
+    brackets = [(k, v) for k, v in list(BRACKETS.items())[:order]]
 
     half_length = length // 2
 
@@ -70,8 +70,8 @@ def _generate_unbalanced_string(order: int, length: int, seed: int = 42) -> str:
 
     word = ""
 
-    opening_brackets = [k for k, _ in list(c.BRACKETS.items())[:order]]
-    closing_brackets = [v for _, v in list(c.BRACKETS.items())[:order]]
+    opening_brackets = [k for k, _ in list(BRACKETS.items())[:order]]
+    closing_brackets = [v for _, v in list(BRACKETS.items())[:order]]
 
     brackets = opening_brackets + closing_brackets
 
@@ -82,7 +82,7 @@ def _generate_unbalanced_string(order: int, length: int, seed: int = 42) -> str:
     random.shuffle(random_brackets)
     unbalanced_str = word + "".join(random_brackets)
 
-    if checker.is_dyck_word(unbalanced_str, order):
+    if is_dyck_word(unbalanced_str, order):
         del unbalanced_str
         del brackets
         return _generate_unbalanced_string(order, length)
@@ -132,10 +132,10 @@ def _generate_samples(
         len(s) >= min_length for s in balanced_strings + unbalanced_strings
     ), "Some strings are shorter than the minimum length."
     assert all(
-        checker.is_dyck_word(s, k) for s in balanced_strings
+        is_dyck_word(s, k) for s in balanced_strings
     ), "Some balanced strings are not members of the Dyck language."
     assert all(
-        not checker.is_dyck_word(s, k) for s in unbalanced_strings
+        not is_dyck_word(s, k) for s in unbalanced_strings
     ), "Some unbalanced strings are members of the Dyck language."
 
     samples = balanced_strings + unbalanced_strings
@@ -183,7 +183,7 @@ def generate_dataset(
             return path
 
     strings: List[str] = _generate_samples(n, k, min_length, max_length, balanced)
-    dataset = [(s, checker.is_dyck_word(s, k)) for s in strings]
+    dataset = [(s, is_dyck_word(s, k)) for s in strings]
 
     if file:
         if not os.path.exists(path.split("/")[0]):
