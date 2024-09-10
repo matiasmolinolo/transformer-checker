@@ -37,7 +37,7 @@ jobs:
         run: poetry config virtualenvs.create false
 
       - name: Install dependencies
-        run: poetry install --sync --no-interaction
+        run: poetry install --without dev
 
       - name: Get tag version
         id: get_tag
@@ -55,7 +55,7 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git commit -am "Bump version to ${{ steps.get_tag.outputs.TAG }}"
-          git push HEAD:master
+          git push HEAD:master HEAD:master
 
       - name: Package project
         run: poetry build
