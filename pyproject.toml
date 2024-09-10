@@ -4,7 +4,25 @@ version = "0.1.0"
 description = "tool to visualize and check neural activations and attention patterns in transformer models that classify context-free languages"
 authors = ["Matias Molinolo <mm231323@fi365.ort.edu.uy>"]
 readme = "README.md"
-package-mode = false
+packages = [
+    { include = "transformer_checker" },
+]
+
+exclude = [
+    "**/__pycache__/",
+    ".git",
+    ".venv/",
+    "_build/",
+    "build/",
+    "data/",
+    "experiments.ipynb",
+    "wandb/",
+    "**/.ipynb_checkpoints/",
+    "**/.DS_Store",
+    "**/*.ipynb",
+
+    ".ruff_cache/",
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"
