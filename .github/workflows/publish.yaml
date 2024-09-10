@@ -15,6 +15,8 @@ jobs:
       name: pypi
       url: https://pypi.org/project/transformer-checker/
     steps:
+      - uses: actions/checkout@v4
+      
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -48,7 +50,6 @@ jobs:
           sed -i "s/__version__ = \".*\"/__version__ = \"${{ steps.get_tag.outputs.TAG }}\"/" transformer_checker/__init__.py
 
       - name: Commit version changes
-        uses: actions/checkout@v4
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
