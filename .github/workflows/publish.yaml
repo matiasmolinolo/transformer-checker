@@ -5,19 +5,15 @@ on:
     tags:
       - '*.*.*'
 
-permissions:
-  contents: write
-
 jobs:
   pypi-publish:
     name: Upload release to PyPI
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     environment:
       name: pypi
       url: https://pypi.org/project/transformer-checker/
-    permissions:
-      id-token: write
-      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -47,13 +43,17 @@ jobs:
       - name: Update package version
         run: poetry version ${{ steps.get_tag.outputs.TAG }}
 
-      - name: Commit version change
+      - name: Update __version__ in __init__.py
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add pyproject.toml
+          sed -i "s/__version__ = \".*\"/__version__ = \"${{ steps.get_tag.outputs.TAG }}\"/" transformer_checker/__init__.py
+
+      - name: Commit version changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add pyproject.toml transformer_checker/__init__.py
           git commit -m "Bump version to ${{ steps.get_tag.outputs.TAG }}"
-          git push
+          git push origin HEAD:main
 
       - name: Package project
         run: poetry build
