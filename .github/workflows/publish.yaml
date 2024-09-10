@@ -39,6 +39,13 @@ jobs:
       - name: Install dependencies
         run: poetry install --sync --no-interaction
 
+      - name: Get tag version
+        id: get_tag
+        run: echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Update package version
+        run: poetry version ${{ steps.get_tag.outputs.TAG }}
+
       - name: Package project
         run: poetry build
 
