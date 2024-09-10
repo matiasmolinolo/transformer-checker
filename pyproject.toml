@@ -53,3 +53,7 @@ exclude = [
     "build",
     "data"
 ]
+
+[tool.poetry.scripts]
+generate-dataset = "transformer_checker:generate_dataset_cli"
+check-dyck-word = "transformer_checker:check_dyck_word"

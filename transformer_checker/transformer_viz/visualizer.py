@@ -71,4 +71,4 @@ def plot_attn_matrices(vocab, batch, model, norm, mask):
         plt.tight_layout()
         plt.show()
 
-__all__ = ['plot_attn_matrices']
+__all__ = ['plot_attn_matrices', 'z_score_normalize', 'min_max_normalize']

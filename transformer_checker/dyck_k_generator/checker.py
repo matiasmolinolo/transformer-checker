@@ -1,13 +1,11 @@
-import typer
 from tqdm import tqdm
-from typing_extensions import Annotated
 
 from .constants import BRACKETS
 
 def is_dyck_word(
-    query: Annotated[str, typer.Argument()],
-    k: Annotated[int, typer.Argument()],
-    verbose: Annotated[bool, typer.Option()] = False,
+    query: str,
+    k: int,
+    verbose: bool = False,
 ) -> bool:
     """
     Check if a word is a member of the Dyck language of order k.
@@ -54,6 +52,3 @@ def is_dyck_word(
         print(result)
     return result
 
-
-if __name__ == "__main__":
-    typer.run(is_dyck_word)

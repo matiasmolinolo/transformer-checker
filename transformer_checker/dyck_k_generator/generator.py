@@ -3,9 +3,7 @@ import os
 import random
 from typing import List, Tuple
 
-import typer
 from tqdm import tqdm
-from typing_extensions import Annotated
 
 from .checker import is_dyck_word
 from .constants import BRACKETS
@@ -145,17 +143,12 @@ def _generate_samples(
 
 
 def generate_dataset(
-    n: Annotated[int, typer.Option(help="The number of strings to generate.")] = 500_000,
-    k: Annotated[int, typer.Option(help="The order of the Dyck language.")] = 3,
-    min_length: Annotated[int, typer.Option(help="The minimum length of the strings to generate.")] = 2,
-    max_length: Annotated[int, typer.Option(help="The maximum length of the strings to generate.")] = 1024,
-    balanced: Annotated[float, typer.Option(help="The proportion of balanced strings to generate.")] = 0.5,
-    file: Annotated[
-        bool,
-        typer.Option(
-            help="If present, the dataset will be saved to a file, otherwise it will be returned to a variable."
-        ),
-    ] = True,
+    n: int = 500_000,
+    k: int = 3,
+    min_length: int = 2,
+    max_length: int = 1024,
+    balanced: float = 0.5,
+    file: bool = True,
 ) -> List[Tuple[str, bool]] | str:
     """
     Generate a list of 'n' strings of length at most 'max_length' from the Dyck language of order 'k'.
@@ -199,6 +192,3 @@ def generate_dataset(
     else:
         return dataset
 
-
-if __name__ == "__main__":
-    typer.run(generate_dataset)
