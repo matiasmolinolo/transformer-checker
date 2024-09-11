@@ -4,6 +4,7 @@ version = "0.1.7"
 description = "tool to visualize and check neural activations and attention patterns in transformer models that classify context-free languages"
 authors = ["Matias Molinolo <mm231323@fi365.ort.edu.uy>"]
 readme = "README.md"
+repository = "https://github.com/matiasmolinolo/transformer-checker"
 packages = [
     { include = "transformer_checker" },
 ]
