@@ -1,6 +1,6 @@
 __version__ = "0.1.6"
 
-from . import transformer_viz
+from .transformer_viz import *
 from .dyck_k_generator import *
-from . import dataset
-from . import transformer
+from .dataset import *
+from .transformer import *

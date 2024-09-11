@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from transformer_checker.dataset.dataset import DyckLanguageTokenizer
+from transformer_checker.dataset import DyckLanguageTokenizer
 
 
 def z_score_normalize(matrix):
