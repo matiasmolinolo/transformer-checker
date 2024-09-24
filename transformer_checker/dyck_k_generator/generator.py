@@ -20,7 +20,8 @@ def _generate_balanced_string(order: int, length: int, seed: int = 42) -> str:
     Returns:
         str: A string of length `length` from the Dyck language of order `order`.
     """
-
+    random.seed(seed)
+    
     if length == 0:
         return ""
 
