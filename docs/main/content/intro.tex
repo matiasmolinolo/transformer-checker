@@ -3,7 +3,7 @@
 Large Language Models (LLMs) have been a topic of interest in the field of Computer Science for the past few years, and more recently, with the release of ChatGPT~\cite{chatgpt} by OpenAI, they have become a topic of interest for the general public too.
 
 These models are based on an architecture called Transformer~\cite{attention_is_all_you_need}, a type of Artificial Neural Network (ANN)
-well suited to process sequences, such as text. These models have grown exponentially, as seen in~\ref{fig:model_sizes}, both in size and complexity, in the last years, and
+well suited to process sequences, such as text. These models have grown exponentially, as seen in Figure~\ref{fig:model_sizes}, both in size and complexity, in the last years, and
 have shown to achieve state-of-the-art results in a wide variety of Natural Language Processing (NLP) and Natural Language Understanding (NLU) tasks.
 
 \begin{figure}[H]
@@ -13,15 +13,17 @@ have shown to achieve state-of-the-art results in a wide variety of Natural Lang
     \label{fig:model_sizes}
 \end{figure}
 
-However, despite their state-of-the-art performance, the inner workings of these models are not yet fully understood and these models are still considered opaque or \emph{black-box}~\cite{lei-etal-2016-rationalizing}, which is a problem for their adoption in critical applications, such as healthcare or finance where decisions need to be explainable and interpretable.
+However, despite their state-of-the-art performance, the inner workings of these models are not yet fully understood and these models are still considered opaque or \emph{black-box}~\cite{lei-etal-2016-rationalizing}, which is a problem for their adoption in critical applications, such as healthcare or finance where decisions need to be explainable and interpretable. We define \emph{explainability} as the capacity to answer questions about a model's particular decision (i.e.: classification, object detection, etc.)~\cite{explainable-ai}.
 
 Moreover, there is still a boundary to the capabilities of these models, regarding which problems can or cannot be solved by them and what can be learned and expressed by these models.
 
-Strobl et.\ al\ \cite{strobl2024formal} define two lines of work regarding this problem: \textit{expressivity} and \textit{trainability}. This work will focus on the latter, as we aim to determine whether through training and using a \textit{white-box} approach, by looking at the attention mechanism and neural activations, whether Transformers are able to learn and classify sequences belonging to a formal language, more specifically, context-free grammars (CFGs) such as Dyck languages.
+Strobl et al.~\cite{strobl2024formal} define two lines of work regarding this problem: \textit{expressivity} and \textit{trainability}. This work will focus on the latter, through training different Transformers and using a \textit{white-box} approach to view the internal workings of these models. 
 
-Chomsky's hierarchy\ \cite{chomsky-hierarchy} classifies CFGs as those languages that can be represented by a nondeterministic pushdown automaton, a class of automata that is more expressive than finite-state machines but less so than Turing machines~\cite{context-free-chomsky}. Pérez, Barceló and Marinkovic propose that architectures based on self-attention, such as Transformers, are Turing complete \cite{attention-tc}, therefore, this leads us to believe that CFGs can be expressed by these neural language models.
+This approach will look at the attention mechanism and neural activations in Transformers that are able to learn and classify sequences belonging to a formal language, more specifically, context-free grammars (CFGs) such as Dyck languages, to see whether we can gain an insight into the inner workings of these models.
 
-Based on the aforementioned, we seek to discuss, through an approach based on \emph{mechanistic interpretability} \cite{mech_interp}, whether attention patterns and neural activations in these architectures can be used to explain the model's classifications, and if these explanations can be leveraged to improve the model's performance and interpretability.
+Chomsky's hierarchy~\cite{chomsky-hierarchy} classifies CFGs as those languages that can be represented by a nondeterministic pushdown automaton, a class of automata that is more expressive than finite-state machines but less so than Turing machines~\cite{context-free-chomsky}. Pérez, Barceló and Marinkovic propose that architectures based on self-attention, such as Transformers, are Turing complete~\cite{attention-tc}, therefore, this leads us to believe that CFGs can be expressed by these neural language models.
+
+We aim to investigate whether attention patterns and neural activations in these architectures can help explain the model's classifications, using an approach rooted in \emph{mechanistic interpretability}, as we will look into the internal components of the model. This concept can be likened to reverse-engineering a program, but applied to neural models~\cite{mech_interp, mech-interp-ai-safety}. Based on this approach, we will explore how these explanations can be leveraged to enhance both the model's performance and its interpretability.
 
 \bigskip
 
@@ -31,10 +33,8 @@ Chapter 2 will introduce the concepts behind formal languages and context-free g
 
 Chapter 3 will introduce the Transformer architecture, with a focus towards the attention mechanism.
 
-Chapter 4 will discuss related works and the state-of-the-art in the field of trainability of transformers, as well as obtained results, comparing them with results obtained by other authors.
+Chapter 4 will discuss related works and the state-of-the-art in the field of trainability, explainability and interpretability of Transformers, as well as obtained results and their implications, comparing them with those obtained by other authors.
 
-Chapter 5 focuses on the experimental setup, the dataset used, the model architecture and the training process.
+Chapter 5 focuses on the experimental setup, engineering process, the dataset used and the training process and results.
 
-Chapter 6 will discuss the results obtained and the implications of these results.
-
-Chapter 7 will summarize the work done and propose future work.
+Chapter 6 will summarize the work done and propose future work.

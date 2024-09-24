@@ -1,0 +1,63 @@
+\section{DyckLanguageTokenizer Implementation}\label{annex:tokenizer-impl}
+
+\begin{lstlisting}[language=Python, caption=DyckLanguageTokenizer implementation, label=code:tokenizer_implementation]
+class DyckLanguageTokenizer:
+    START_TOKEN, PAD_TOKEN, END_TOKEN = 0, 1, 2
+    base_vocab = {"[start]": START_TOKEN, "[pad]": PAD_TOKEN, "[end]": END_TOKEN}
+
+    def __init__(self, vocab: str):
+        self.vocab = vocab
+        self.tok_to_i = {
+            **{tok: i + 3 for i, tok in enumerate(vocab)},
+            **self.base_vocab,
+        }
+        self.i_to_tok = {i: tok for tok, i in self.tok_to_i.items()}
+        
+        # Precompute tokenization mapping
+        self.char_to_token = np.zeros(256, dtype=np.float32)
+        for char, token in self.tok_to_i.items():
+            if len(char) == 1:
+                self.char_to_token[ord(char)] = token
+
+    def tokenize(self, strings: str | List[str], max_len=None):
+        if isinstance(strings, str):
+            strings = [strings]
+
+        if max_len is None:
+            max_len = max((max(len(s) for s in strings)), 1)
+
+        # Vectorized tokenization
+        tokenized = np.full((len(strings), max_len + 2), self.PAD_TOKEN, dtype=np.float32)
+        tokenized[:, 0] = self.START_TOKEN
+        
+        lengths = np.array([len(s) for s in tqdm(strings, desc="Calculating lengths")])
+        for i, s in enumerate(tqdm(strings, desc="Tokenizing strings")):
+            tokenized[i, 1:lengths[i]+1] = self.char_to_token[[ord(c) for c in s]]
+        
+        # Efficient end token placement
+        tokenized[np.arange(len(strings)), lengths + 1] = self.END_TOKEN
+
+        return torch.from_numpy(tokenized)
+
+    def decode(self, tokens, remove_special_tokens=True):
+        if tokens.ndim < 2:
+            raise ValueError("Needs to have a batch dimension.")
+
+        def i_to_c(i):
+            if i < len(self.i_to_tok):
+                return self.i_to_tok[i]
+            raise ValueError(f"Index {i} not in vocabulary")
+
+        if remove_special_tokens:
+            return [
+                "".join(i_to_c(i.item()) for i in seq[1:] if i != self.START_TOKEN and i != self.END_TOKEN)
+                for seq in tokens
+            ]
+        return [" ".join(i_to_c(i.item()) for i in seq) for seq in tokens]
+
+    def decode_single(self, tokens, remove_special_tokens=True):
+        return self.decode(tokens.unsqueeze(0), remove_special_tokens=remove_special_tokens)[0]
+
+    def __repr__(self):
+        return f"DyckLanguageTokenizer(vocab={self.vocab!r})"
+\end{lstlisting}

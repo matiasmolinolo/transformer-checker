@@ -12,7 +12,8 @@
   year          = {2023},
   eprint        = {1706.03762},
   archiveprefix = {arXiv},
-  primaryclass  = {cs.CL}
+  primaryclass  = {cs.CL},
+  url           = {https://arxiv.org/abs/1706.03762}
 }
 
 @misc{model_sizes,
@@ -42,13 +43,34 @@
   pages     = {107--117}
 }
 
+@misc{explainable-ai,
+      title={Explainable AI: current status and future directions}, 
+      author={Prashant Gohel and Priyanka Singh and Manoranjan Mohanty},
+      year={2021},
+      eprint={2107.07045},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2107.07045}, 
+}
+
+@misc{mech-interp-ai-safety,
+      title={Mechanistic Interpretability for AI Safety -- A Review}, 
+      author={Leonard Bereska and Efstratios Gavves},
+      year={2024},
+      eprint={2404.14082},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2404.14082}, 
+}
+
 @misc{strobl2024formal,
   title         = {What Formal Languages Can Transformers Express? A Survey},
   author        = {Lena Strobl and William Merrill and Gail Weiss and David Chiang and Dana Angluin},
   year          = {2024},
   eprint        = {2311.00208},
   archiveprefix = {arXiv},
-  primaryclass  = {cs.LG}
+  primaryclass  = {cs.LG},
+  url           = {https://arxiv.org/abs/2311.00208}
 }
 
 @incollection{context-free-chomsky,
@@ -204,3 +226,180 @@ title = {{PyTorch 2: Faster Machine Learning Through Dynamic Python Bytecode Tra
 url = {https://pytorch.org/assets/pytorch2-2.pdf},
 year = {2024}
 }
+
+@misc{wandb,
+title = {Experiment Tracking with Weights and Biases},
+year = {2020},
+note = {Software available from wandb.com},
+url={https://www.wandb.com/},
+author = {Biewald, Lukas},
+}
+
+@article{dropout,
+  author  = {Nitish Srivastava and Geoffrey Hinton and Alex Krizhevsky and Ilya Sutskever and Ruslan Salakhutdinov},
+  title   = {Dropout: A Simple Way to Prevent Neural Networks from Overfitting},
+  journal = {Journal of Machine Learning Research},
+  year    = {2014},
+  volume  = {15},
+  number  = {56},
+  pages   = {1929--1958},
+  url     = {http://jmlr.org/papers/v15/srivastava14a.html}
+}
+
+@misc{bert,
+      title={BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding}, 
+      author={Jacob Devlin and Ming-Wei Chang and Kenton Lee and Kristina Toutanova},
+      year={2019},
+      eprint={1810.04805},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/1810.04805}, 
+}
+
+@article{hahn-transformer,
+    author = {Hahn, Michael},
+    title = "{Theoretical Limitations of Self-Attention in Neural Sequence Models}",
+    journal = {Transactions of the Association for Computational Linguistics},
+    volume = {8},
+    pages = {156-171},
+    year = {2020},
+    month = {01},
+    abstract = "{Transformers are emerging as the new workhorse of NLP, showing great success across tasks. Unlike LSTMs, transformers process input sequences entirely through self-attention. Previous work has suggested that the computational capabilities of self-attention to process hierarchical structures are limited. In this work, we mathematically investigate the computational power of self-attention to model formal languages. Across both soft and hard attention, we show strong theoretical limitations of the computational abilities of self-attention, finding that it cannot model periodic finite-state languages, nor hierarchical structure, unless the number of layers or heads increases with input length. These limitations seem surprising given the practical success of self-attention and the prominent role assigned to hierarchical structure in linguistics, suggesting that natural language can be approximated well with models that are too weak for the formal languages typically assumed in theoretical linguistics.}",
+    issn = {2307-387X},
+    doi = {10.1162/tacl_a_00306},
+    url = {https://doi.org/10.1162/tacl\_a\_00306},
+    eprint = {https://direct.mit.edu/tacl/article-pdf/doi/10.1162/tacl\_a\_00306/1923102/tacl\_a\_00306.pdf},
+}
+
+@software{hf-tokenizer,
+    author = {Moi, Anthony and Patry, Nicolas},
+    license = {Apache-2.0},
+    month = {April},
+    title = {{HuggingFace's Tokenizers}},
+    url = {https://github.com/huggingface/tokenizers},
+    version = {0.13.4},
+    year = {2023}
+}
+
+@Inbook{handbook-formal-languages,
+author="Mateescu, Alexandru
+and Salomaa, Arto",
+editor="Rozenberg, Grzegorz
+and Salomaa, Arto",
+title="Formal Languages: an Introduction and a Synopsis",
+bookTitle="Handbook of Formal Languages: Volume 1 Word, Language, Grammar",
+year="1997",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="1--39",
+abstract="What is a language? By consulting a dictionary one finds, among others, the following explanations:1The body of words and systems for their use common to people who are of the same community or nation, the same geographical area, or the same cultural tradition.2Any set or system of signs or symbols used in a more or less uniform fashion by a number of people who are thus enabled to communicate intelligibly with one other.3Any system of formalized symbols, signs, gestures, or the like, used or conceived as a means of communicating thought, emotion, etc.",
+isbn="978-3-642-59136-5",
+doi="10.1007/978-3-642-59136-5_1",
+url="https://doi.org/10.1007/978-3-642-59136-5_1"
+}
+
+@Inbook{handbook-cfg,
+author="Autebert, Jean-Michel
+and Berstel, Jean
+and Boasson, Luc",
+editor="Rozenberg, Grzegorz
+and Salomaa, Arto",
+title="Context-Free Languages and Pushdown Automata",
+bookTitle="Handbook of Formal Languages: Volume 1 Word, Language, Grammar",
+year="1997",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="111--174",
+abstract="This chapter is devoted to context-free languages. Context-free languages and grammars were designed initially to formalize grammatical properties of natural languages [9]. They subsequently appeared to be well adapted to the formal description of the syntax of programming languages. This led to a considerable development of the theory.",
+isbn="978-3-642-59136-5",
+doi="10.1007/978-3-642-59136-5_3",
+url="https://doi.org/10.1007/978-3-642-59136-5_3"
+}
+
+@book{kleene-star,
+  title     = "Foundations of discrete mathematics",
+  author    = "Fletcher, Peter and Hoyle, Hughes and Patty, C Wayne",
+  publisher = "Brooks/Cole",
+  month     =  nov,
+  year      =  1990,
+  address   = "Florence, KY"
+}
+
+@misc{adam,
+      title={Adam: A Method for Stochastic Optimization}, 
+      author={Diederik P. Kingma and Jimmy Ba},
+      year={2017},
+      eprint={1412.6980},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/1412.6980}, 
+}
+
+@inproceedings{sa-nets-dyck-n,
+    title = "How Can Self-Attention Networks Recognize {D}yck-n Languages?",
+    author = "Ebrahimi, Javid  and
+      Gelda, Dhruv  and
+      Zhang, Wei",
+    editor = "Cohn, Trevor  and
+      He, Yulan  and
+      Liu, Yang",
+    booktitle = "Findings of the Association for Computational Linguistics: EMNLP 2020",
+    month = nov,
+    year = "2020",
+    address = "Online",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2020.findings-emnlp.384",
+    doi = "10.18653/v1/2020.findings-emnlp.384",
+    pages = "4301--4306",
+    abstract = "We focus on the recognition of Dyck-n (Dn) languages with self-attention (SA) networks, which has been deemed to be a difficult task for these networks. We compare the performance of two variants of SA, one with a starting symbol (SA+) and one without (SA-). Our results show that SA+ is able to generalize to longer sequences and deeper dependencies. For D2, we find that SA- completely breaks down on long sequences whereas the accuracy of SA+ is 58.82{\%}. We find attention maps learned by SA+ to be amenable to interpretation and compatible with a stack-based language recognizer. Surprisingly, the performance of SA networks is at par with LSTMs, which provides evidence on the ability of SA to learn hierarchies without recursion.",
+}
+
+@article{weiss-rnn-automata,
+author = {Weiss, Gail and Goldberg, Yoav and Yahav, Eran},
+year = {2022},
+month = {06},
+pages = {},
+title = {Extracting automata from recurrent neural networks using queries and counterexamples (extended version)},
+volume = {113},
+journal = {Machine Learning},
+doi = {10.1007/s10994-022-06163-2}
+}
+
+@misc{carrasco-llm,
+      title={Analyzing constrained LLM through PDFA-learning}, 
+      author={Matías Carrasco and Franz Mayr and Sergio Yovine and Johny Kidd and Martín Iturbide and Juan Pedro da Silva and Alejo Garat},
+      year={2024},
+      eprint={2406.08269},
+      archivePrefix={arXiv},
+      primaryClass={cs.FL},
+      url={https://arxiv.org/abs/2406.08269}, 
+}
+
+@misc{mayr-automata,
+      title={Towards Efficient Active Learning of PDFA}, 
+      author={Franz Mayr and Sergio Yovine and Federico Pan and Nicolas Basset and Thao Dang},
+      year={2022},
+      eprint={2206.09004},
+      archivePrefix={arXiv},
+      primaryClass={cs.FL},
+      url={https://arxiv.org/abs/2206.09004}, 
+}
+
+@misc{sae-lm,
+      title={Sparse Autoencoders Find Highly Interpretable Features in Language Models}, 
+      author={Hoagy Cunningham and Aidan Ewart and Logan Riggs and Robert Huben and Lee Sharkey},
+      year={2023},
+      eprint={2309.08600},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2309.08600}, 
+}
+
+@article{bricken-monosemanticity,
+       title={Towards Monosemanticity: Decomposing Language Models With Dictionary Learning},
+       author={Bricken, Trenton and Templeton, Adly and Batson, Joshua and Chen, Brian and Jermyn, Adam and Conerly, Tom and Turner, Nick and Anil, Cem and Denison, Carson and Askell, Amanda and Lasenby, Robert and Wu, Yifan and Kravec, Shauna and Schiefer, Nicholas and Maxwell, Tim and Joseph, Nicholas and Hatfield-Dodds, Zac and Tamkin, Alex and Nguyen, Karina and McLean, Brayden and Burke, Josiah E and Hume, Tristan and Carter, Shan and Henighan, Tom and Olah, Christopher},
+       year={2023},
+       journal={Transformer Circuits Thread},
+       note={https://transformer-circuits.pub/2023/monosemantic-features/index.html}
+    }
+

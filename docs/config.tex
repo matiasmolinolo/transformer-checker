@@ -18,10 +18,10 @@
 \usepackage[unicode,
             pdftex]{hyperref}
 \hypersetup{
- pdfauthor={Matias Molinolo De Ferrari},%TODO
- pdftitle={Exploring Attention Patterns and Neural Activations in Transformer Architectures for Sequence Classification in Context Free Grammars},%TODO
- pdfsubject={Computer Science},%TODO
- pdfkeywords={Artificial Intelligence; Transformers; Neural networks; Formal languages; Formal grammars; Pushdown automata; Explainability; Interpretability; Expressivity}%TODO
+ pdfauthor={{Matias Molinolo De Ferrari}},
+ pdftitle={Exploring Attention Patterns and Neural Activations in Transformer Architectures for Sequence Classification in Context Free Grammars},
+ pdfsubject={Computer Science},
+ pdfkeywords={Artificial Intelligence; Transformers; Neural networks; Attention Mechanism; Attention Patterns; Formal languages; Formal grammars; Pushdown automata; Explainability; Interpretability; Expressivity}
 }
 
 %%%%%%%%%%%%%%%%%%% http://tex.stackexchange.com/a/103290
@@ -81,6 +81,7 @@
 %%para incluir imagenes
 \usepackage{graphicx}
   \graphicspath{{./figs}}
+\usepackage{subcaption}
 
 %%para la bibliografía
 %%cambia el nombre
@@ -266,7 +267,7 @@
 \usepackage{framed} % http://tex.stackexchange.com/a/53843
 
 %%%%%%%%%%%%%%%%%%%%%%%%%% para poder hacer captions de mas de una linea
-\usepackage{caption} % http://tex.stackexchange.com/a/112660
+\usepackage[justification=centering]{caption} % http://tex.stackexchange.com/a/112660
 
 %%%%%%%%%%%%%%%%%%%%%%%%%% para que el espacio entre parrafos se mas grande
 %\usepackage[parfill]{parskip}
@@ -289,7 +290,7 @@
 %http://tex.stackexchange.com/a/3793
 \usepackage{amsmath}
 
-
+\usepackage{url}
 %%%%%%%%%%%%%%%%%%%%%%%%% linea de timepo http://tex.stackexchange.com/a/198372
 \newcommand\ytl[2]{%con texto del lado izquierdo de la linea
 \parbox[b]{8em}{\hfill{\color{black}\bfseries\sffamily #1}~$\cdots\cdots$~}\makebox[0pt][c]{$\bullet$}\vrule\quad \parbox[c]{6cm}{\vspace{7pt}\color{red!40!black!80}\raggedright\sffamily #2\\[7pt]}\\[-3pt]}

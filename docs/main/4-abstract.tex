@@ -1,15 +1,10 @@
 {\huge\bfseries \space Abstract}
 \bigskip
-%%%%%%%%%%%%%%%% Cuerpo del Abstract %%%%%%%%%%%%%%%%%%%
 
-
-Cuerpo del Abstract.
+This work explores attention patterns and neural activations within Transformer architectures from a \emph{mechanistic interpretability} point of view, specifically, on their application to sequence classification tasks related to context-free grammars, focusing on Dyck-$k$ languages. We investigate whether Transformers, through their attention mechanisms, can effectively model and classify the aforementioned languages, which serve as a canonical example of context-free grammars. The work also addresses the broader issue of trainability of these models, analyzing how the model architecture impacts its ability to learn recursive structures. By employing Transformers trained on sequences of Dyck-$k$ languages, this work empirically show the attention patterns that emerge align with the structural dependencies within the sequences. Bidirectional masking was found to significantly enhance the model’s performance, leading to perfect accuracy in classification tasks, while causal masking introduced limitations in trainability and generalization. The work further emphasizes the importance of attention mechanisms in parsing and recognizing hierarchical languages, contributing to discussions on the explainability and interpretability of neural networks. A detailed analysis of experimental results and attention matrices provide insights into the internal workings of these models, suggesting that these architectures, when properly trained, are capable of capturing complex syntactical structures of context-free languages without the need of recursion. A key outcome of this research is the development of the \verb|transformer-checker| library, a tool designed to facilitate the training, evaluation, and visualization of transformers on formal language tasks. The tools integrates an explainability module to visualize attention matrices. The code is publicly available.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bigskip
-\bigskip
-\bigskip
 \bigskip
 \bigskip
 \bigskip
@@ -20,7 +15,8 @@ Cuerpo del Abstract.
 %%%%%%%%%%%%%%%% Cuerpo del Abstract %%%%%%%%%%%%%%%%%%%
 
 
-Cuerpo del Abstract.
+Este trabajo explora los patrones de atención y activaciones neuronales dentro de modelos con arquitecturas Transformer, desde un punto de vista de la \emph{interpretabilidad mecanística}, específicamente en clasificación de secuencias pertenecientes a gramáticas libres de contexto, enfocándose en lenguajes Dyck-$k$. Se investigó si los Transformers, a través de sus mecanismos de atención, pueden modelar y clasificar efectivamente los lenguajes mencionados anteriormente, que sirven como ejemplo canónico de las gramáticas libres de contexto. El trabajo apunta también al problema más amplio de la entrenabilidad de estos modelos, analizando cómo la arquitectura impacta su capacidad de aprender estructuras recursivas. Al usar Transformers entrenados en secuencias de lenguajes Dyck-$k$, este trabajo muestra de forma empírica que los patrones de atención que surgen se alinean con las dependencias estructurales dentro de las secuencias. Se encontró que el uso de una máscara bidireccional mejora significativamente la performance del modelo, logrando una precisión perfecta en la tarea de clasificación, mientras que el uso de máscaras causales introdujo limitaciones en la entrenabilidad y generalización. Este trabajo subraya la importancia de los mecanismos de atención  en el análisis y reconocimiento de lenguajes jerárquicos, contribuyendo a la discusión acerca de la explicabilidad e interpretabilidad de los modelos neuronales. Un detallado análisis de los resultados experimentales y las matrices de atención provee información acerca del funcionamiento interno de estos modelos, sugiriendo que estas arquitecturas, cuando son entrenadas correctamente, son capaces de capturar las estructuras sintácticas complejas de los lenguajes libres de contexto sin la necesidad de recursión. Un resultado clave de esta investigación es el desarrollo de la librería \verb|transformer-checker|, una herramienta diseñada para facilitar el entrenamiento, evaluación y visualización de Transformers en tareas de lenguajes formales. La herramienta integra un módulo de explicabilidad para visualizar las matrices de atención. El código es de acceso público.
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
